@@ -6,7 +6,7 @@
 - [01. 스프링 시작하기](./spring/springInAction/chapter01.md)
 
 ### [강의] 스프링 핵심 원리 - 기본편
-- [01. 객체 지향 설계와 스프링].
+- [01. 객체 지향 설계와 스프링](./spring/basic/section01.md)
 
 ## Docker & Kubernetes
 
