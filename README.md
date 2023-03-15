@@ -7,6 +7,8 @@
 
 ### [강의] 스프링 핵심 원리 - 기본편
 - [01. 객체 지향 설계와 스프링](./spring/basic/section01.md)
+- [02. 스프링 핵심 원리 이해1 - 예제 만들기](./spring/basic/section02.md)
+- [03. 스프링 핵심 원리 이해2 - 객체 지향 원리 적용](./spring/basic/section03.md)
 
 ## Docker & Kubernetes
 
