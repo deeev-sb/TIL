@@ -11,6 +11,18 @@
 - [02. 스프링 핵심 원리 이해1 - 예제 만들기](./spring/basic/section02.md)
 - [03. 스프링 핵심 원리 이해2 - 객체 지향 원리 적용](./spring/basic/section03.md)
 
+## Java
+
+### [강의] 더 자바, Java 8
+- [01. 함수형 인터페이스와 람다 표현식](./java/java8/section01.md)
+- [02. 메서드 레퍼런스 (Method Reference)](./java/java8/section02.md)
+- [03. 인터페이스 default 메서드와 static 메서드](./java/java8/section03.md)
+
+## Elastic Stack
+
+### [강의] ELK 스택 (ElasticSearch, Logstash, Kibana) 으로 데이터 분석
+- [01. Elasticsearch 설치 및 CRUD](./elastic-stack/analyze-data-with-elk-stack/01.md)
+
 ## Docker & Kubernetes
 
 ### [책] 그림과 실습으로 배우는 도커 & 쿠버네티스
