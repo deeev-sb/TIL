@@ -17,6 +17,9 @@
 - [01. 함수형 인터페이스와 람다 표현식](./java/java8/section01.md)
 - [02. 메서드 레퍼런스 (Method Reference)](./java/java8/section02.md)
 - [03. 인터페이스 default 메서드와 static 메서드](./java/java8/section03.md)
+- [04. Stream](./java/java8/section04.md)
+- [05. Optional](./java/java8/section05.md)
+- [06. Date와 Time](./java/java8/section06.md)
 
 ## Elastic Stack
 
