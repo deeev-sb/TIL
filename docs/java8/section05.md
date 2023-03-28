@@ -272,3 +272,9 @@ Optional<OnlineClass> spring = springClasses.stream()
     ```
 
   참고로 Stream에서 쓰는 flatMap은 input은 하나이지만 output이 여러 개인 상황에 사용므로, Optional의 flatMap과 다르다!
+
+> 본 게시글은 [스프링 핵심 원리 - 기본편](https://www.inflearn.com/course/the-java-java8) 강의를 참고하여 작성되었습니다.
+>
+>
+> 상세한 내용이 궁금하시다면 강의 수강을 추천해 드립니다.
+>

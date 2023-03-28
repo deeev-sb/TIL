@@ -188,3 +188,9 @@
     ```
 
 - TimeZone과 ZoneId는 호환된다.
+
+> 본 게시글은 [스프링 핵심 원리 - 기본편](https://www.inflearn.com/course/the-java-java8) 강의를 참고하여 작성되었습니다.
+>
+>
+> 상세한 내용이 궁금하시다면 강의 수강을 추천해 드립니다.
+>

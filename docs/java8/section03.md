@@ -264,3 +264,9 @@ public class NameApp {
   nullsFirst()는 정렬 시 null 값의 우선순위가 가장 높고, nullsLast()는 null 값의 우선순위가 가장 낮다.
 
 - static comparing()
+
+> 본 게시글은 [스프링 핵심 원리 - 기본편](https://www.inflearn.com/course/the-java-java8) 강의를 참고하여 작성되었습니다.
+>
+>
+> 상세한 내용이 궁금하시다면 강의 수강을 추천해 드립니다.
+>

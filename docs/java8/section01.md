@@ -276,15 +276,15 @@ public class Shadowing {
 
 - **주요 함수형 인터페이스 요약 테이블**
 
-    | Interface | Function | Description | 함수 조합용 메서드      |
-    | --- | --- |-----------------| --- |
-    | Function<T, R> |  R apply(T t) | T 타입을 받아서 R 타입으로 리턴하는 함수형 인터페이스 | andThen<br/>compose |
-    | BiFunction<T, U, R> | R apply(T t, U u) | 두 개의 값 (T, U) 를 받아서 R 타입을 리턴하는 함수형 인터페이스 |                 |
-    | Consumer<T> | void accept(T t) | T 타입을 받아서 아무 값도 리턴하지 않는 함수형 인터페이스 | andThen         |
-    | Supplier<T> | T get() | T 타입의 값을 제공하는 함수형 인터페이스 |                 |
-    | Predicate<T> | boolean test(T t) | T 타입을 받아서 boolean을 리턴하는 함수형 인터페이스 | And<br/>Or<br/>Negate  |
-    | UnaryOperator<T> |  | Function<T, R>의 특수한 형태로, 입력 값 하나를 받아서 동일한 타입으로 리턴하는 함수형 인터페이스 |                 |
-    | BinaryOperator<T> |  | BiFunction<T, U, R>의 특수한 형태로, 동일한 타입의 입력 값 두 개를 받아 리턴하는 함수형 인터페이스 |                 |
+| Interface             | Function          | Description                                                         | 함수 조합용 메서드            |
+|-----------------------|-------------------|---------------------------------------------------------------------|-----------------------|
+| `Function<T, R>`      | R apply(T t)      | T 타입을 받아서 R 타입으로 리턴하는 함수형 인터페이스                                     | andThen<br/>compose   |
+| `BiFunction<T, U, R>` | R apply(T t, U u) | 두 개의 값 (T, U) 를 받아서 R 타입을 리턴하는 함수형 인터페이스                            |                       |
+| `Consumer<T>`         | void accept(T t)  | T 타입을 받아서 아무 값도 리턴하지 않는 함수형 인터페이스                                   | andThen               |
+| `Supplier<T>`         | T get()           | T 타입의 값을 제공하는 함수형 인터페이스                                             |                       |
+| `Predicate<T>`        | boolean test(T t) | T 타입을 받아서 boolean을 리턴하는 함수형 인터페이스                                   | And<br/>Or<br/>Negate |
+| `UnaryOperator<T>`    |                   | `Function<T, R>`의 특수한 형태로, 입력 값 하나를 받아서 동일한 타입으로 리턴하는 함수형 인터페이스     |                       |
+| `BinaryOperator<T>`   |                   | `BiFunction<T, U, R>`의 특수한 형태로, 동일한 타입의 입력 값 두 개를 받아 리턴하는 함수형 인터페이스 |                       |
 
 ### 코드로 보기
 
@@ -331,3 +331,9 @@ public class FunctionalInterfaces {
     }
 }
 ```
+
+> 본 게시글은 [더 자바, Java8](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%95%B5%EC%8B%AC-%EC%9B%90%EB%A6%AC-%EA%B8%B0%EB%B3%B8%ED%8E%B8) 강의를 참고하여 작성되었습니다.
+>
+>
+> 상세한 내용이 궁금하시다면 강의 수강을 추천해 드립니다.
+>
