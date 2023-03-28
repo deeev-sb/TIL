@@ -16,7 +16,7 @@
 
       ⇒ JPA(Java Persistence API) 로 발전시킴
 
-        ![](../../image/spring/basic/01-01.png)
+        ![](../../.vuepress/public/images/spring/basic/01-01.png)
 
 ### 스프링 역사
 
@@ -138,7 +138,7 @@
 - 다형성으로 인터페이스를 구현한 객체를 실행 시점에 유연하게 변경할 수 있음
 - 상속 관계도 다형성, 오버라이딩 적용 가능
 
-    ![](../../image/spring/basic/01-02.png)
+    ![](../../.vuepress/public/images/spring/basic/01-02.png)
 
     ```java
     public class MemberService { 

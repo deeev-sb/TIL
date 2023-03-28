@@ -10,7 +10,7 @@
 
 이들의 관계는 아래와 같이 정리할 수 있다.
 
-![](../../image/spring/springInAction/02-01.png)
+![](../../.vuepress/public/images/spring/springInAction/02-01.png)
 
 ### 2.1.1 도메인 설정하기
 

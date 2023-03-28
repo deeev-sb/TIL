@@ -8,7 +8,7 @@
 
 ### 커맨드
 
-![](../image/docker&k8s/07-01.png)
+![](../.vuepress/public/images/docker&k8s/07-01.png)
 
 - up 커맨드
     - docker run 커맨드와 비슷
@@ -43,7 +43,7 @@
 - 정의 파일은 한 폴더에 하나만 존재해야 함
     - 컨테이너 생성에 필요한 이미지 파일이나 HTML 파일도 컴포즈가 사용할 폴더에 함께 둠
 
-![](../image/docker&k8s/07-02.png)
+![](../.vuepress/public/images/docker&k8s/07-02.png)
 
 ## 3. 도커 컴포즈 파일을 작성하는 법
 

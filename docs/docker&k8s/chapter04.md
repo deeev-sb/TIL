@@ -18,7 +18,7 @@
 
    도커 설정 클릭 → General > Start Docker Desktop when you log in 체크
 
-   ![](../image/docker&k8s/04-01.png)
+   ![](../.vuepress/public/images/docker&k8s/04-01.png)
 
 ## 2. 컨테이너의 기본적인 사용 방법
 
@@ -32,12 +32,12 @@
 
 - docker 명령 뒤로 **‘무엇을’**, **‘어떻게’**, **‘대상’** 순으로 지정한다.
 
-  ![](../image/docker&k8s/04-02.png)
+  ![](../.vuepress/public/images/docker&k8s/04-02.png)
 
 - container와 같이 상위 커맨드의 종류는 **12종류** 뿐이다.
 - 이 외에도 **‘옵션’과 ‘인자’라는 추가 정보**가 붙는다.
 
-  ![](../image/docker&k8s/04-03.png)
+  ![](../.vuepress/public/images/docker&k8s/04-03.png)
 
     - 옵션은 커맨드에 세세한 설정을 지정하는 용도로 쓰인다.
     - 인자는 대상에 전달할 값을 지정한다. 문자 코드 또는 포트 번호 등을 전달할 수 있다.
@@ -122,11 +122,11 @@
 즉, `docker run`은 컨테이너를 생성하는 docker create (docker container create), 컨테이너를 실행하는 docker start (docker container start),
 이미지를 내려받는 docker pull (docker image pull) 커맨드를 한 번에 실행하는 것이다.
 
-![](../image/docker&k8s/04-04.png)
+![](../.vuepress/public/images/docker&k8s/04-04.png)
 
 - 커맨드 형식
 
-  ![](../image/docker&k8s/04-05.png)
+  ![](../.vuepress/public/images/docker&k8s/04-05.png)
 
 - 주요 옵션
 
@@ -153,15 +153,15 @@
 
 - 정지 커맨드 형식
 
-  ![](../image/docker&k8s/04-06.png)
+  ![](../.vuepress/public/images/docker&k8s/04-06.png)
 
 - 삭제 커맨드 형식
 
-  ![](../image/docker&k8s/04-07.png)
+  ![](../.vuepress/public/images/docker&k8s/04-07.png)
 
 **(참고) 컨테이너의 생애주기**
 
-![](../image/docker&k8s/04-08.png)
+![](../.vuepress/public/images/docker&k8s/04-08.png)
 
 ### docker ps 커맨드
 
@@ -169,7 +169,7 @@
 
 - 커맨드 형식
 
-  ![](../image/docker&k8s/04-09.png)
+  ![](../.vuepress/public/images/docker&k8s/04-09.png)
 
 - 명령어 실행 시 출력되는 컨테이너 목록의 주요 항목
 
@@ -265,11 +265,11 @@ docker run --name apachetest -d -p 8080:80 httpd
 
 - 커맨드 형식
 
-  ![](../image/docker&k8s/04-10.png)
+  ![](../.vuepress/public/images/docker&k8s/04-10.png)
 
 - 여러 개의 이미지를 지정하는 경우
 
-  ![](../image/docker&k8s/04-11.png)
+  ![](../.vuepress/public/images/docker&k8s/04-11.png)
 
 ### docker image ls
 

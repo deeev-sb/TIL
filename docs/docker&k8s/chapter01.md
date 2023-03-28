@@ -12,7 +12,7 @@
     - 윈도우나 macOS 환경에서 도커를 구동하는 경우, 내부적으로 리눅스를 사용한다.
     - 컨테이너에서 동작시킬 프로그램도 리눅스용 프로그램이다.
 
-![](../image/docker&k8s/01-01.png)
+![](../.vuepress/public/images/docker&k8s/01-01.png)
 
 ### 데이터나 프로그램을 독립된 환경에 격리해야 하는 이유
 
@@ -23,14 +23,14 @@
 
     - 시스템 A와 시스템 B가 같은 디렉터리를 사용하게 될 경우 설정 파일이 섞이거나 설정에 충돌이 발생할 수도 있다.
 
-![](../image/docker&k8s/01-02.png)
+![](../.vuepress/public/images/docker&k8s/01-02.png)
 
 ### 프로그램의 격리란?
 
 - 도커 컨테이너는 완전히 독립된 환경이므로 여러 컨테이너에서 같은 프로그램을 실행할 수 있다.
     - 버전이 동일해도 상관없다.
 
-![](../image/docker&k8s/01-03.png)
+![](../.vuepress/public/images/docker&k8s/01-03.png)
 
 ## 2. 서버와 도커
 
@@ -39,11 +39,11 @@
 - 어떤 서비스(service)를 제공(serve)하는 것을 의미
 - 기능적 의미의 서버와 물리적 컴퓨터로서의 서버로 구분할 수 있다.
 
-  ![](../image/docker&k8s/01-04.png)
+  ![](../.vuepress/public/images/docker&k8s/01-04.png)
 
 - 서버의 운영체제로는 주로 리눅스가 사용된다.
 
-  ![](../image/docker&k8s/01-05.png)
+  ![](../.vuepress/public/images/docker&k8s/01-05.png)
 
 ### 기능적 의미의 서버
 
@@ -66,7 +66,7 @@
 
 - 컨테이너는 격리된 공간에서 동작하기 때문에, 하나의 물리 서버에 두 개의 웹 서버를 올리는 등 여러 서버를 구축할 수 있다.
 - 도커를 이용하면 컨테이너 환경을 자유롭게 이동할 수 있다.
-  ![](../image/docker&k8s/01-06.png)
+  ![](../.vuepress/public/images/docker&k8s/01-06.png)
 
 > 본 게시글은 [그림과 실습으로 배우는 도커 & 쿠버네티스](https://product.kyobobook.co.kr/detail/S000001766500) 도서를 참고하여 작성되었습니다.
 > 상세한 내용이 궁금하시다면 책을 읽어보실 것을 추천해 드립니다.
