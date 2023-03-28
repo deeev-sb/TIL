@@ -6,6 +6,7 @@
   "author": "Kim SuBin <sb2504@naver.com>",
   "license": "MIT",
   "devDependencies": {
+    "@vuepress/plugin-back-to-top": "^1.9.9",
     "vuepress": "^1.9.9"
   },
   "scripts": {
