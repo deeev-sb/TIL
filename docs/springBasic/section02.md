@@ -15,7 +15,7 @@
 - 최근 IntelliJ 버전은 Gradle을 통해서 실행하는 것이 기본 설정 ⇒ 실행 속도가 느림
 - 아래와 같이 변경하면 자바로 바로 실행해서 속도가 더 빠름
 
-  ![](../../.vuepress/public/images/spring/basic/02-01.png)
+  ![](../.vuepress/public/images/springBasic/02-01.png)
 
 
 ## 2. 비즈니스 요구사항과 설계
@@ -41,7 +41,7 @@
 - 회원 DB는 아직 확정된 상태가 아니기 때문에 회원 저장소 구현체가 3개로 나뉘어짐
 - 메모리 회원 저장소로 선개발 진행 (재부팅 시 모든 데이터가 사라짐)
 
-![](../../.vuepress/public/images/spring/basic/02-02.png)
+![](../.vuepress/public/images/springBasic/02-02.png)
 
 ### 회원 클래스 다이어그램
 
@@ -51,20 +51,20 @@
   (외부 시스템 연동은 그림에 표시되어 있지 않음)
 
 
-![](../../.vuepress/public/images/spring/basic/02-03.png)
+![](../.vuepress/public/images/springBasic/02-03.png)
 
 ### 회원 객체 다이어그램
 
 - 객체 간의 참조를 나타낸 다이어그램
 - 여기서 회원 서비스는 MemberServiceImpl
 
-![](../../.vuepress/public/images/spring/basic/02-04.png)
+![](../.vuepress/public/images/springBasic/02-04.png)
 
 ## 4. 회원 도메인 개발
 
 ### 파일 구조
 
-![](../../.vuepress/public/images/spring/basic/02-05.png)
+![](../.vuepress/public/images/springBasic/02-05.png)
 
 ### 회원 등급
 
@@ -173,7 +173,7 @@ public class MemberApp {
 
 코드를 실행시켜 보면 member 와 findMember 가 동일함을 확인할 수 있음 (순수 Java 코드만 사용했으며, Spring 활용 x)
 
-![](../../.vuepress/public/images/spring/basic/02-06.png)
+![](../.vuepress/public/images/springBasic/02-06.png)
 
 그러나 이렇게 애플리케이션 로직으로 테스트하는 것은 좋은 방법이 아님!!
 
@@ -217,7 +217,7 @@ public class MemberServiceTest {
 
 ### 주문 도메인 협렵, 역할, 책임
 
-![](../../.vuepress/public/images/spring/basic/02-07.png)
+![](../.vuepress/public/images/springBasic/02-07.png)
 
 1. **주문 생성** : 클라이언트는 주문 서비스에 주문 생성 요청
 2. **회원 조회** : 할인을 위해 회원 등급 필요 → 주문 서비스는 회원 저장소에서 회원 조회
@@ -235,29 +235,29 @@ public class MemberServiceTest {
 
 ⇒ 회원 저장소는 물론, 할인 정책도 유연하게 변경 가능
 
-![](../../.vuepress/public/images/spring/basic/02-08.png)
+![](../.vuepress/public/images/springBasic/02-08.png)
 
 ### 주문 도메인 클래스 다이어그램
 
-![](../../.vuepress/public/images/spring/basic/02-09.png)
+![](../.vuepress/public/images/springBasic/02-09.png)
 
 ### 주문 도메인 객체 다이어그램 1
 
 회원을 메모리에서 조회하고, 정액 할인 정책 (고정 금액)을 지원해도 주문 서비스는 변경하지 않아도 되며, 역할들의 협력 관계를 그대로 재사용 가능
 
-![](../../.vuepress/public/images/spring/basic/02-10.png)
+![](../.vuepress/public/images/springBasic/02-10.png)
 
 ### 주문 도메인 객체 다이어그램 2
 
 회원을 메모리가 아닌 실제 DB에서 조회하고, 정률 할인 정책 (주문 금액에 따라 % 할인)을 지원해도 주문 서비스를 변경하지 않아도 되며, 협력 관계를 그대로 재사용 가능
 
-![](../../.vuepress/public/images/spring/basic/02-11.png)
+![](../.vuepress/public/images/springBasic/02-11.png)
 
 ## 7. 주문과 할인 도메인 개발
 
 ### 파일 구조
 
-![](../../.vuepress/public/images/spring/basic/02-12.png)
+![](../.vuepress/public/images/springBasic/02-12.png)
 
 ### 할인 정책 인터페이스
 
@@ -374,7 +374,7 @@ public class OrderApp {
 
 실행 결과 할인된 금액이 잘 출력되는 것을 확인할 수 있음. 이전에도 얘기했듯 애플리케이션 로직으로 테스트하는 것은 좋은 방법이 아니니 JUnit 테스트를 사용하자.
 
-![](../../.vuepress/public/images/spring/basic/02-13.png)
+![](../.vuepress/public/images/springBasic/02-13.png)
 
 ### 주문과 할인 정책 테스트
 

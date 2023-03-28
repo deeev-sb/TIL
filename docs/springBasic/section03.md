@@ -9,7 +9,7 @@
 
 ### RateDiscountPolicy 추가
 
-![](../../.vuepress/public/images/spring/basic/03-01.png)
+![](../.vuepress/public/images/springBasic/03-01.png)
 
 RateDiscountPolicy 코드를 추가해보자
 
@@ -81,18 +81,18 @@ public class OrderServiceImpl implements OrderService {
 - 역할과 구현을 충분하게 분리했으며, 다형성을 활용하고 인터페이스와 구현 객체를 분리했으나, OCP와 DIP 같은 객체 지향 설계 원칙을 충분히 준수하지 않다.
 - **DIP 위반** : 주문 서비스 클라이언트 (OrderServiceImpl) 는 DiscountPolicy 인터페이스 뿐만 아니라 구현 클래스에도 의존하고 있다.
 
-  ![](../../.vuepress/public/images/spring/basic/03-02.png)
+  ![](../.vuepress/public/images/springBasic/03-02.png)
 
 - **OCP 위반** : 할인 정책 변경 시 클라이언트 (OrderServiceImpl) 의 소스 코드를 함께 변경해야 한다.
 
-  ![](../../.vuepress/public/images/spring/basic/03-03.png)
+  ![](../.vuepress/public/images/springBasic/03-03.png)
 
 
 ### 문제 해결 방법
 
 DIP를 위반하지 않게 인터페이스에만 의존하도록 의존관계를 변경하면 된다.
 
-![](../../.vuepress/public/images/spring/basic/03-04.png)
+![](../.vuepress/public/images/springBasic/03-04.png)
 
 ```java
 public class OrderServiceImpl implements OrderService {
@@ -178,14 +178,14 @@ public class MemberServiceImpl implements MemberService {
 - MemberServiceImple은 이제 **의존 관계에 대한 고민은 외부에 맡기고 실행에만 집중하면 된다.**
 - **클래스 다이어그램**
 
-  ![](../../.vuepress/public/images/spring/basic/03-05.png)
+  ![](../.vuepress/public/images/springBasic/03-05.png)
 
     - **객체 생성과 연결은 AppConfig가 담당한다.**
     - **DIP 완성** : MemberServiceImple은 MemberRepository인 추상에만 의존하면 되며, 구체 클래스를 몰라도 된다.
     - **관심사 분리** : 객체를 생성하고 연결하는 역할과 실행하는 역할이 명확히 분리되었다.
 - **회원 객체 인스턴스 다이어그램**
 
-  ![](../../.vuepress/public/images/spring/basic/03-06.png)
+  ![](../.vuepress/public/images/springBasic/03-06.png)
 
     - appConfig 객체는 memoryMemberRepository **객체를 생성**하고 그 참조값을 memberServiceImple을 생성하면서 **생성자를 전달**한다.
     - 클라이언트인 memberServiceImpl 입장에서 보면 **의존관계를 마치 외부에서 주입해주는 것 같다**고 해서 **DI(Dependency Injection)** 우리말로 **의존관계 주입** 또는 **의존성 주입**이라고 한다.
@@ -322,7 +322,7 @@ public class OrderServiceImpl implements OrderService {
 
 ### 기대하는 그림
 
-![](../../.vuepress/public/images/spring/basic/03-07.png)
+![](../.vuepress/public/images/springBasic/03-07.png)
 
 ### 리팩터링
 
@@ -359,7 +359,7 @@ AppConfig의 등장으로 애플리케이션이 크게 사용 영역과 객체�
 
 할인 정책이 변경되면 구성 영역만 변경되면 되며, 사용 영역은 변경되지 않는다.
 
-![](../../.vuepress/public/images/spring/basic/03-08.png)
+![](../.vuepress/public/images/springBasic/03-08.png)
 
 변경된 할인 정책에 맞게 코드를 변경해주자
 
@@ -442,12 +442,12 @@ AppConfig의 등장으로 애플리케이션이 크게 사용 영역과 객체�
     - 클래스가 사용하는 import 코드만 보고 의존관계를 쉽게 판단할 수 있음
     - 정적인 의존 관계는 애플리케이션을 실행하지 않아도 분석할 수 있음
 
-  ![](../../.vuepress/public/images/spring/basic/03-09.png)
+  ![](../.vuepress/public/images/springBasic/03-09.png)
 
 - **동적인 객체 인스턴스 의존관계**
     - 애플리케이션 실행 시점에 새로 생성된 객체 인스턴스의 잠조가 연결된 의존 관계
 
-  ![](../../.vuepress/public/images/spring/basic/03-10.png)
+  ![](../.vuepress/public/images/springBasic/03-10.png)
 
     - 애플리케이션 실행 시점(런타임)에 외부에서 실제 구현 객체를 생성하고 클라이언트에 전달해 클라이언트와 서버의 실제 의존관계가 연결되는 것을 **의존관계 주입**이라 한다.
     - 객체 인스턴스를 생성하고, 그 참조값을 전달해서 연결된다.
