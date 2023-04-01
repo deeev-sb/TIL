@@ -28,7 +28,7 @@ const getFilePaths = (files, dir) => {
         if (file === 'README.md') {
             return path.join(dir);
         }
-        return path.join(dir, file);
+        return path.join(dir, file).split(path.sep).join('/');
     });
 };
 
