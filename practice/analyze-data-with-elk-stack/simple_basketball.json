@@ -1,0 +1,4 @@
+{ "index" : { "_index" : "basketball", "_type" : "record", "_id" : "1" } }
+{"team" : "Chicago Bulls","name" : "Subin Kim", "points" : 30,"rebounds" : 3,"assists" : 4, "submit_date" : "2023-03-20"}
+{ "index" : { "_index" : "basketball", "_type" : "record", "_id" : "2" } }
+{"team" : "Chicago Bulls","name" : "Subin Kim","points" : 20,"rebounds" : 5,"assists" : 8, "submit_date" : "2023-04-03"}
