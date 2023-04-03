@@ -1,9 +1,9 @@
 { "index" : { "_index" : "classes", "_type" : "class", "_id" : "1" } }
-{"title" : "Machine Learning","Professor" : "YoungJun Park","major" : "Computer Science","semester" : ["spring", "fall"],"student_count" : 100,"unit" : 3,"rating" : 5, "submit_date" : "2020-01-02", "school_location" : {"lat" : 36.00, "lon" : -120.00}}
+{"title" : "Machine Learning","Professor" : "Subin Kim","major" : "Computer Science","semester" : ["spring", "fall"],"student_count" : 100,"unit" : 3,"rating" : 5, "submit_date" : "2020-01-02", "school_location" : {"lat" : 36.00, "lon" : -120.00}}
 { "index" : { "_index" : "classes", "_type" : "class", "_id" : "2" } }
-{"title" : "Network","Professor" : "YoungJun Park","major" : "Computer Science","semester" : ["fall"],"student_count" : 50,"unit" : 3,"rating" : 4, "submit_date" : "2020-02-02", "school_location" : { "lat" : 36.00, "lon" : -120.00}}
+{"title" : "Network","Professor" : "Subin Kim","major" : "Computer Science","semester" : ["fall"],"student_count" : 50,"unit" : 3,"rating" : 4, "submit_date" : "2020-02-02", "school_location" : { "lat" : 36.00, "lon" : -120.00}}
 { "index" : { "_index" : "classes", "_type" : "class", "_id" : "3" } }
-{"title" : "Operating System","Professor" : "YoungJun Park","major" : "Computer Science","semester" : ["spring"],"student_count" : 50,"unit" : 3,"rating" : 4, "submit_date" : "2020-03-02", "school_location" : {"lat" : 36.00, "lon" : -120.00}}
+{"title" : "Operating System","Professor" : "Subin Kim","major" : "Computer Science","semester" : ["spring"],"student_count" : 50,"unit" : 3,"rating" : 4, "submit_date" : "2020-03-02", "school_location" : {"lat" : 36.00, "lon" : -120.00}}
 { "index" : { "_index" : "classes", "_type" : "class", "_id" : "5" } }
 {"title" : "Machine Learning","Professor" : "Tim Cook","major" : "Computer Science","semester" : ["spring"],"student_count" : 40,"unit" : 3,"rating" : 2, "submit_date" : "2020-04-02", "school_location" : {"lat" : 39.00, "lon" : -112.00}}
 { "index" : { "_index" : "classes", "_type" : "class", "_id" : "6" } }
