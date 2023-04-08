@@ -44,7 +44,7 @@
 
 해당 챕터에서 나온 BOJ.2750를 직접 푼 풀이는 아래 링크 걸어두었습니다. 😄😄
 
-👉 [문제 풀이 보러가기](https://github.com/Kim-SuBin/Algorithm/blob/main/doit/chapter01/Ch01P01.java)
+👉 [문제 풀이 보러가기](https://github.com/Kim-SuBin/Algorithm/blob/main/doit/Ch01P01.java)
 
 
 > 본 게시글은 [Do it! 알고리즘 코딩 테스트 - 자바편](https://product.kyobobook.co.kr/detail/S000001818060) 도서를 참고하여 작성되었습니다.
