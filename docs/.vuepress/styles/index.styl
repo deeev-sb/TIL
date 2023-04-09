@@ -5,7 +5,6 @@
 
 img {
   max-width: 700px !important;
-  width: 100%;
 }
 
 .sidebar {
@@ -17,7 +16,7 @@ img {
 }
 
 .theme-default-content:not(.custom) {
-  max-width: 1200px !important;
+  max-width: 100% !important;
   word-break: break-all;
 }
 
@@ -31,6 +30,12 @@ h1 {
 .name {
   font-weight: 900;
   font-size: 2rem;
+}
+
+@media (max-width: 1200px) {
+  img {
+    max-width: 100% !important;
+  }
 }
 
 @media (max-width: 550px) {
