@@ -30,6 +30,7 @@ module.exports = {
             sidebar.getSidebarGroup('java8', '[강의] 더 자바, Java 8'),
             sidebar.getSidebarGroup('analyze-data-with-elk-stack', '[강의] ELK 스택으로 데이터 분석 (7.10.2 ver)'),
             sidebar.getSidebarGroup('docker&k8s', '[책] 그림과 실습으로 배우는 도커 & 쿠버네티스'),
+            sidebar.getSidebarGroup('do-it-algorithm-coding-test-with-java', '[책] Do it! 알고리즘 코딩 테스트 - 자바편'),
         ],
     }
 
