@@ -99,7 +99,7 @@
 
   ⇒ 출력을 확인해보면 아래와 같이 `main`, `ForkJoinPool`을 통해 병렬 처리되고 있음을 확인할 수 있다.
 
-    ```
+    ```shell
     lee main
     park ForkJoinPool.commonPool-worker-5
     kim ForkJoinPool.commonPool-worker-19
