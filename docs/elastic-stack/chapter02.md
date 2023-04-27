@@ -1,0 +1,69 @@
+# 02. 실습 환경 구성
+
+책의 2장에서는 윈도우 환경에 **엘라스틱서치**와 **키바나**를 설치하는 방법에 대해 설명하며, **로그스태시**는 6장, **비츠**는 7장에서 설치 방법을 설명합니다. 그러나 여기서는 자세한 설치 방법에 대한 내용은 생략하며, 궁금하시다면 책을 참고하시길 바랍니다.
+
+엘라스틱 스택에 포함되는 제품들은 다음과 같은 언어 기반으로 만들어져, 운영체제에 대한 종속이 거의 없는 편입니다.
+
+|제품|개발 언어|
+|---|---|
+|엘라스틱서치 (Elasticsearch)|자바 (Java)|
+|로그스태시 (Logstash)|제이루비 (JRuby)|
+|키바나 (Kibana)|자바스크립트 (Javascript)|
+|비츠 (Beats)|고 (Go)|
+
+다만, 실제 엘라스틱에서 공식적으로 동작을 보증하는 환경이나 버전에 대해서는 [공식 홈페이지의 서포트 매트릭스](https://www.elastic.co/kr/support/matrix#matrix_os)를 확인하시길 바랍니다.
+
+## 2.1. 엘라스틱서치 설치 및 실행
+엘라스틱서치 설치 및 실행 방법은 [공식 문서](https://www.elastic.co/guide/en/elasticsearch/reference/7.10/install-elasticsearch.html)에서 확인하거나 책을 참고하시길 바랍니다. 참고로, 책에서는 7.10.1 버전을 사용하며, 필자는 7.10.2 버전을 사용합니다.
+
+엘라스틱서치 설치 및 실행을 하면, 아래 명령어를 통해 정상 응답이 오는지 확인할 수 있습니다.
+
+```bash
+curl -X GET localhost:9200?pretty
+```
+
+정상적으로 엘라스틱서치가 실행되었다면 아애롸 유사한 형태의 JSON 응답을 확인할 수 있습니다.
+
+```json
+{
+  "name" : "DESKTOP-NAME",
+  "cluster_name" : "elasticsearch",
+  "cluster_uuid" : "Mv2TExL_TTqg3-ztGaIHIQ",
+  "version" : {
+    "number" : "7.10.2",
+    "build_flavor" : "default",
+    "build_type" : "zip",
+    "build_hash" : "747e1cc71def077253878a59143c1f785afa92b9",
+    "build_date" : "2021-01-13T00:42:12.435326Z",
+    "build_snapshot" : false,
+    "lucene_version" : "8.7.0",
+    "minimum_wire_compatibility_version" : "6.8.0",
+    "minimum_index_compatibility_version" : "6.0.0-beta1"
+  },
+  "tagline" : "You Know, for Search"
+}
+```
+
+명령 시 사용한 `curl`은 다양한 통신 프로토콜을 지원하여 데이터를 전송할 수 있는 소프트웨어입니다. 명령행 기반의 터미널 환경에서 동작하기 때문에 서버 환경에서 쉽게 테스트해볼 수 있다는 장점이 있습니다. `-X` 는 옵션이며, 아래와 같은 옵션을 많이 사용합니다.
+
+|옵션|설명|
+|---|---|
+|-X|요청 시 사용할 메소드를 정한다. (POST/GET/PUT/DELETE)|
+|-d|POST 요청에서만 사용되며, 데이터를 전송할 수 있다.|
+|-o|리모트에서 받아온 데이터를 표준 출력에 보여주는 것이 아닌 파일 형식으로 저장한다.|
+
+## 2.2. 키바나 설치 및 실행
+키바나 설치 및 실행 방법은 [공식 문서](https://www.elastic.co/guide/en/kibana/7.10/install.html)에서 확인하거나 책을 참고하시길 바랍니다.
+
+키바나 설치 및 실행을 완료하면 `http://localhost:5601` 주소를 통해 웹 브라우저 접속을 할 수 있습니다. 이 때, **엘라스틱서치를 먼저 실행하고 키바나를 실행**해야 합니다.
+
+## 2.3. 엘라스틱 스택 라이선스 확인
+
+엘라스틱서치와 키바나를 정상적으로 실행하여 브라우저에 접속하였다면, 이번에는 엘라스틱 스택 라이선스를 확인해보도록 하겠습니다. 메뉴를 열어 `Management > Stack Management > Stack > License Management` 로 접속하면 현재 설정된 라이선스를 확인할 수 있습니다. 최초 설치 시 자동으로 베이직 라이선스가 활성화되며, 여기서는 베이직 라이선스를 통해 실습을 진행할 예정입니다.
+
+![image](https://user-images.githubusercontent.com/46712693/234765028-88333315-ea84-4e58-aa1f-50be08546058.png)
+
+> 본 게시글은 [엘라스틱 스택 개발부터 운영까지](https://product.kyobobook.co.kr/detail/S000001932755) 도서를 참고하여 작성되었습니다.
+>
+> 상세한 내용이 궁금하시다면 책을 읽어보실 것을 추천해 드립니다.
+>
