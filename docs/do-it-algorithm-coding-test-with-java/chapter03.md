@@ -33,7 +33,7 @@
 구간 합 알고리즘을 이용하려면 먼저 합 배열을 구해야 합니다.
 배열 A가 있을 때, 합 배열 S는 다음과 같이 정의합니다.
 
-<img src="../.vuepress/public/images/do-it-algorithm-coding-test-with-java/03-03.png" width="350" />
+<img alt="image" src="../.vuepress/public/images/do-it-algorithm-coding-test-with-java/03-03.png" width="350" />
 
 ```markdown
 S[i] = A[0] + A[1] + A[2] + ... + A[i - 1] + A[i] // A[0]부터 A[i]까지의 합
@@ -56,7 +56,7 @@ S[j] - S[i - 1] // i 에서 j까지의 구간합
 
 예를 들어, 배열 A의 A[2]부터 A[5]의 구간 합을 합 배열을 통해 구하고자 한다면, S[5] - S[1]을 하면 됩니다.
 
-<img src="../.vuepress/public/images/do-it-algorithm-coding-test-with-java/03-04.png" width="330" />
+<img alt="image" src="../.vuepress/public/images/do-it-algorithm-coding-test-with-java/03-04.png" width="330" />
 
 ```markdown
 S[5] - S[1] = A[2] + A[3] + A[4] + A[5]
@@ -102,10 +102,9 @@ public class Main {
             materials[i] = sc.nextInt();
         }
         
-         // 풀이 호출하여 출력
+        // 풀이 호출하여 출력
         System.out.println(solution(material, armor, materials));
     }
-
     
     // 실제 풀이 부분
     private static int solution(int material, int armor, int[] materials) {
@@ -136,13 +135,69 @@ public class Main {
 
 ## 3.4. 슬라이딩 윈도우
 슬라이딩 윈도우 알고리즘은 2개의 포인터로 범위를 지정한 다음, **범위를 유지한 채로 이동**하여 문제를 해결합니다.
-투 포인터 알고리즘과 매우 비슷하며, 이번에도 책에 나오는 여러 문제 중 하나인 []()를 예로 들어 알고리즘에 대해 살펴보도록 하겠습니다.
+투 포인터 알고리즘과 매우 비슷하며, 이번에도 책에 나오는 여러 문제 중 하나인 [BOJ 12891. DNA 비밀번호](https://www.acmicpc.net/problem/12891)를 예로 들어 알고리즘에 대해 살펴보도록 하겠습니다.
 
 ### 문제 분석하기
+DNA 문자열과 부분 문자열의 길이가 1,000,000으로 매우 크기 때문에 O(n)의 시간 복잡도 알고리즘으로 문제를 해결해야 합니다.
+이때 부분 문자열의 길이가 P이므로 슬라이딩 윈도우의 개념을 이용하면 문제를 해결할 수 있습니다.
+
+슬라이딩 윈도우는 다음과 같이 P라는 범위를 유지한 채 이동하며 조건에 맞는지 탐색하는 방식입니다.
+
+<img width="371" alt="image" src="https://user-images.githubusercontent.com/46712693/236681104-f815d49a-0656-4266-a14a-3c8b774765c4.png">
 
 ### 풀이 살펴보기
+책에서는 배열을 사용하였으나, 여기서는 Map을 활용하여 문제를 풀어나갔습니다.
+1. S 문자열 길이, P 문자열 길이는 숫자로, S 문자열은 그대로 문자열로 입력 받고, 비밀번호 조건은 Map 형태로 입력 받습니다.
+2. S 문자열 중 P 길이의 부분 문자열에 대한 값을 저장 후, 비밀번호가 조건에 맞는지 확인합니다.
+
+   <img width="649" alt="image" src="https://user-images.githubusercontent.com/46712693/236682025-630744bc-72a6-4639-aee3-71692a351153.png">
+
+3. 윈도우를 한 칸 이동하며 현재 상태를 업데이트한 다음, 비밀번호가 조건에 맞는지 확인합니다. 해당 과정은 S 문자열를 모두 확인할 때까지 이동하며 반복합니다.
+
+   <img width="604" alt="image" src="https://user-images.githubusercontent.com/46712693/236682340-67bfd704-85f3-421e-9339-712d80e0a009.png">
 
 ### 코드 작성하기
+```java
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        int dnaSize = sc.nextInt();
+        int pwdSize = sc.nextInt();
+        String dna = sc.next();
+        Map<Character, Integer> wordSize = new HashMap<>();
+        wordSize.put('A', sc.nextInt());
+        wordSize.put('C', sc.nextInt());
+        wordSize.put('G', sc.nextInt());
+        wordSize.put('T', sc.nextInt());
+        // 풀이 호출하여 출력
+        System.out.println(solution(dnaSize, pwdSize, dna, wordSize));
+    }
+
+    // 실제 풀이 부분
+    private static long solution(int dnaSize, int pwdSize, String dna, Map<Character, Integer> wordSize) {
+        long answer = 0;
+        Map<Character, Integer> word = new HashMap<>();
+
+        for (int i = 0; i < dnaSize; i++) {
+            // 문자 추가
+            word.put(dna.charAt(i), word.getOrDefault(dna.charAt(i), 0) + 1);
+
+            if (i < pwdSize - 1) continue;
+
+            // 부분문자열이 조건에 맞는지 확인
+            if (wordSize.get('A') <= word.getOrDefault('A', 0) && wordSize.get('C') <= word.getOrDefault('C', 0)
+                    && wordSize.get('G') <= word.getOrDefault('G', 0) && wordSize.get('T') <= word.getOrDefault('T', 0))
+                answer++;
+
+            // 현재 부분문자열 맨 앞 문자 제외하기
+            word.put(dna.charAt(i - pwdSize + 1), word.getOrDefault(dna.charAt(i - pwdSize + 1), 0) - 1);
+        }
+
+        return answer;
+    }
+}
+```
 
 ## 3.5. 스택과 큐
 
