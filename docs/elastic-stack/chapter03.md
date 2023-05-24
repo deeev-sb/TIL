@@ -388,7 +388,458 @@ GET index5
 }
 ```
 
+## 3.5. 벌크 데이터
+
 엘라스틱서치는 여러 개의 API를 한 번에 수행할 수 있는 `bulk API`를 지원하며, bulk API를 통해 REST API 콜(call) 횟수를 줄여 성능을 높일 수 있습니다.
+
+bulk API는 도큐먼트 읽기는 지원하지 않고, **도큐먼트 생성/수정/삭제**만 지원합니다.
+
+```bash
+POST _bulk
+{"index" : {"_index" : "test", "_id" : "1"}}
+{"field1" : "value1"}
+{"create" : {"_index" : "test", "_id" : "3"}}
+{"field1" : "value3"}
+{"update" : {"_id" : "1", "_index" : "test"}}
+{"doc" : {"field2" : "value2"}}
+{"delete" : {"_index" : "test", "_id" : "2"}}
+```
+
+위 예제를 통해 알 수 있는 사실은 다음과 같습니다.
+
+- 삭제는 한 줄, 나머지는 두 줄로 작성
+  - 첫 번째 줄은 bulk 키워드를 포함한 도큐먼트 작업 정보
+  - 두 번째 줄은 생성/수정 관련 field, value
+- NDJSON (New-line Delimited JSON) 형태 : 복수의 JSON 구조를 줄바꿈 문자열로 구분
+
+ 벌크 데이터를 파일 형태로 만들어서 적용하는 방법도 있습니다. 키바나 콘솔에서는 파일 불러오기를 할 수 없기 때문에 콘솔에서 `curl`로 `bulk API`를 사용해봅시다.
+
+먼저, 다음과 같은 내용을 가진 벌크 파일 bulk_index2를 생성합니다.
+
+```json
+{"index" : {"_index" : "index2", "_id" : "4"}}
+{"name" : "park",  "age" : 30, "gender" : "female"}
+{"index" : {"_index" : "index2", "_id" : "5"}}
+{"name" : "jung",  "age" : 50, "gender" : "female"}
+{"index" : {"_index" : "index2", "_id" : "6"}}
+{"name" : "lee",  "age" : 40, "gender" : "female"}
+{"index" : {"_index" : "index2", "_id" : "7"}}
+{"name" : "kim",  "age" : 20, "gender" : "female"}
+```
+
+그리고 아래의 `curl` 명령어를 통해 bulk 파일을 실행합니다.
+
+```bash
+curl -H "Content-Type: application/x-ndjson" -X POST "localhost:9200/_bulk" --data-binary "@./bulk_index2"
+```
+
+curl 명령을 자세히 살펴보면 다음과 같습니다.
+- `-H` : curl 헤더 옵션, 여기서는 NDJSON 타입의 콘텐츠를 사용한다는 의미
+- `-X` : 요청 메소드, 여기서는 POST
+- `localhost:9200` : 엘라스틱서치 호스트 주소
+- `/_bulk` : bulk API 호출
+- `--data-binary` : POST 메소드에 파일을 바이너리 형태로 전송해주는 파라미터
+
+## 3.6. 매핑
+
+매핑(mapping)은 **JSON 형태의 데이터를 루씬이 이해할 수 있도록 바꿔주는 작업**입니다. 엘라스틱서치가 자동으로 하면 다이나믹 매핑, 사용자가 직접 설정하면 명시적 매핑이라고 합니다.
+
+### 3.6.1. 다이나믹 매핑
+
+엘라스틱서치의 모든 인덱스는 매핑 정보를 갖고 있지만, 정의를 강제하지 않습니다. 그렇기 때문에 앞에서 index2 인덱스를 만들 때 따로 매핑을 설정하지 않았습니다. 그럼에도 도큐먼트가 인덱싱되었던 이유는 엘라스틱서치의 다이나믹 매핑(dynamic mapping) 때문입니다. 원본 데이터가 다이나믹 매핑에 의해 어떤 타입으로 변환되는지 아래 표를 통해 살펴봅시다.
+
+|원본 소스 데이터 타입|다이나믹 매핑으로 변환된 데이터 타입|
+|:---|:---|
+|null|필드를 추가하지 않음|
+|boolean|boolean|
+|float|float|
+|integer|long|
+|object|object|
+|string|string 데이터 형태에 따라 date, text/keword 필드|
+
+다이나믹 매핑의 장단점은 다음과 같습니다.
+- 장점
+  - 스키마 설계를 고민하기보다 데이터의 형태만 고민하면 됨
+- 단점
+  - 숫자 타입은 무조건 범위가 가장 넓은 long으로 매핑되어 불필요한 메모리를 차지할 수 있음
+  - 문자열의 경우 검색과 정렬 등을 고려한 매핑이 제대로 되지 않음
+
+엘라스틱서치는 인덱스 매핑값을 확인할 수 있는 `mapping API`를 제공하고 있습니다. mapping API를 통해 index2 인덱스의 매핑 값이 어떻게 되어 있는지 확인해봅시다.
+
+```bash
+GET index2/_mapping
+```
+
+명령어를 실행해보면 다음과 같이 age는 long 타입으로 매핑되어 있고, country와 gender, name은 text 타입과 keyword 타입이 모두 선언되어 있는 것을 확인할 수 있습니다.
+
+```json
+{
+  "index2" : {
+    "mappings" : {
+      "properties" : {
+        "age" : {
+          "type" : "long"
+        },
+        "country" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
+        },
+        "gender" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
+        },
+        "name" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### 3.6.2. 명시적 매핑
+
+인덱스를 직접 정의하는 명시적 매핑은 두 가지 방법을 통해 인덱스에 매핑을 할 수 있습니다.
+
+1. 인덱스를 생성할 때 mappings 정의 설정
+2. mapping API를 이용해 매핑 지정
+
+먼저 인덱스를 생성할 때 mappings 정의를 설정하는 방법을 살펴보도록 하겠습니다. mappings 정의 설정은 다음과 같은 구조로 합니다.
+
+```bash
+PUT "인덱스명"
+{
+    "mappings": {
+        "properties": {
+            "필드명" : "필드 타입"
+        }
+    }
+}
+```
+
+이 구조로 index3 인덱스를 만들면서 직접 매핑을 해보도록 하겠습니다.
+
+```bash
+PUT index3
+{
+    "mappings": {
+        "properties": {
+            "age": {"type": "short"},
+            "name": {"type": "text"},
+            "gender": {"type": "keyword"}
+        }
+    }
+}
+```
+
+`GET index3/_mapping`을 통해 설정한 매핑이 적용되었는지 확인해보면, 아래와 같이 정상적으로 적용된 것을 확인할 수 있습니다.
+
+```json
+{
+  "index3" : {
+    "mappings" : {
+      "properties" : {
+        "age" : {
+          "type" : "short"
+        },
+        "gender" : {
+          "type" : "keyword"
+        },
+        "name" : {
+          "type" : "text"
+        }
+      }
+    }
+  }
+}
+```
+
+이렇게 명시적 매핑을 하려면 **인덱스에 들어갈 데이터의 구조를 이해**하고 있어야 합니다.그리고 **인덱스 매핑이 정해지면 새로운 필드는 추가할 수 있으나, 이미 정의된 필드를 수정하거나 삭제할 수는 없습니다.** 그러므로 매핑 작업은 신중하게 해야 합니다. 여기서는 `properties` 파라미터를 사용하였는데, 이 외에 분석기(analyzer)나 포맷(format) 등을 설정하는 파라미터도 있습니다.
+
+### 3.6.3. 매핑 타입
+
+명시적 매핑을 하기 위해서는 엘라스틱서치에서 사용하는 데이터 타입에 대한 이해가 필요합니다. 다양한 데이터 타입 중 기본적인 데이터 타입에 대해서만 살펴보도록 하겠습니다.
+
+|데이터 형태|데이터 타입|설명|
+|:---:|:---|:---|
+|텍스트|text|전문 검색이 필요한 데이터로, 텍스트 분석기가 텍스트를 작은 단위로 분리함|
+||keyword|정렬이나 집계에 사용되는 텍스트 데이터로, 원문을 통째로 인덱싱함|
+|날짜|date|날짜/시간 데이터|
+|정수|byte|부호 있는 8비트 데이터 (-128 ~ 127)|
+||short|부호 있는 16비트 데이터 (-32,768 ~ 32,767)|
+||integer|부호 있는 32비트 데이터 (-2^31 ~ 2^31 - 1)|
+||long|부호 있는 64비트 데이터 (-2^63 ~ 2^63 - 1)|
+|실수|scaled_float|float 데이터에 특정 값을 곱해서 정수형으로 바꾼 데이터. 정확도는 떨어지나 필요에 따라 집계 등에서 효율적으로 사용 가능|
+||half_float|16비트 부동소수점 실수 데이터|
+||double|32비트 부동소수점 실수 데이터|
+||float|64비트 부동소수점 실수 데이터|
+|불린|boolean|참/거짓 데이터로, true/false 만을 값으로 가짐|
+|IP 주소|ip|ipv4, ipv6 타입 IP 주소로 입력 가능|
+|위치 정보|geo-point|위도, 경도 값을 가짐|
+||geo-shape|하나의 위치 포인트가 아닌 임의의 지형|
+|범위 값|integer_range, long_range, float_range, double_range, ip_range, date_range|범위를 설정할 수 있는 데이터, integer_range, long_range는 정수형 범위, float_range, double_range는 실수형 범위, ip_range는 IP 주소 범위, date_range는 날짜/시간 데이터 범위 값을 저장하고 검색할 수 있게 함. 최솟값과 최댓값을 통해 범위 입력|
+|객체형|object|계층 구조를 갖는 형태로, 필드 안에 다른 필드들이 들어갈 수 있음. name: {"first": "kim", "last": "tony"}로 타입을 정의하면 name.first, name/last 형태로 접근 가능|
+|배열형|nested|배열형 객체 저장. 배열 내부의 객체에 쿼리로 접근 가능|
+||join|부모/자식 관계 표현 가능|
+
+### 3.6.4. 멀티 필드를 활용한 문자열 처리
+엘라스틱서치 5.x 버전부터 문자열 타입이 텍스트와 키워드라는 두 가지 타입으로 분리되었습니다.
+
+1. 텍스트 타입
+    - 일반적으로 문장을 저장하는 매핑 타입
+    - 텍스트 타입 문자열은 분석기에 의해 토큰으로 분리됨 ⇒ 역인덱싱(분리된 토큰들 인덱싱) 됨
+    - 역인덱스에 저장된 토큰들을 용어(term)라고 함
+    - 전문 검색에 사용
+    - 텍스트 타입 인덱스 생성 방법
+        ```bash
+        PUT text_index
+        {
+            "mappings": {
+                "properties": {
+                    "feild_name": {"type": "text"}
+                }
+            }
+        }
+        ```
+2. 키워드 타입
+    - 규칙성이 있거나 유의미한 값들의 집합인 범주형 데이터에 주로 사용
+    - 문자열 전체가 하나의 용어로 인덱싱
+    - 집계나 정렬에 사용
+    - 텍스트가 정확히 일치하는 경우에만 값 검색 (부분 일치 X)
+    - 키워드 타입 인덱스 생성 방법
+        ```bash
+        PUT keyword_index
+        {
+            "mappings": {
+                "properties": {
+                    "feild_name": {"type": "keyword"}
+                }
+            }
+        }
+        ```
+3. 멀티 필드
+    - 단일 필드 입력에 대해 여러 하위 필드를 정의하는 기능
+    - fields라는 매핑 파라미터 사용
+    - 전문 검색이 필요하면서 정렬이나 필터도 필요한 경우 사용
+    - 텍스트 타입 인덱스 생성 방법
+        ```bash
+        PUT multifield_index
+        {
+            "mappings": {
+                "properties": {
+                    "feild_name": {
+                        "type": "text",
+                        "fields": {
+                            "keyword": {"type": "keyword"}
+                        }
+                    }
+                }
+            }
+        }
+        ```
+
+## 3.7. 인덱스 템플릿
+
+인덱스 템플릿은 주로 **설정이 동일한 복수의 인덱스를 만들 때 사용**합니다.
+
+### 3.7.1. 템플릿 확인
+
+다음 명령어를 통해 템플릿을 확인할 수 있습니다.
+
+```bash
+GET _index_template
+```
+
+아직 설정한 템플릿이 없기 때문에 아래처럼 아무 내용이 없이 인덱스 템플릿 설정에 대한 내용을 반환합니다.
+
+```json
+{
+  "index_templates" : [ ]
+}
+```
+
+### 3.7.2. 템플릿 설정
+
+`test_template` 라는 이름으로 **인덱스 템플릿을 생성**해보도록 하겠습니다.
+
+```bash
+PUT _index_template/test_template
+{
+    "index_patterns": ["test_*"],
+    "priority": 1,
+    "template": {
+        "settings": {
+            "number_of_shards": 3,
+            "number_of_replicas": 1
+        },
+        "mappings": {
+            "properties": {
+                "name": {"type": "text"},
+                "age": {"type": "short"},
+                "gender": {"type": "keyword"}
+            }
+        }
+    }
+}
+```
+
+위 명령어를 입력하면 `test_template`가 생성됩니다. 여기서 템플릿에 사용된 `indeX_patterns`, `priority`, `template`는 자주 사용하는 템플릿 파라미터입니다.
+
+|파라미터|설명|
+|:---:|:---|
+|index_patterns|새로 만들어지는 인덱스 중 인덱스 이름이 인덱스 패턴과 매칭되는 경우, 이 템플릿 적용. 여기서는 test_로 시작하는 이름을 가진 인덱스 모두 test_template 적용|
+|priority|인덱스 생성 시 이름에 매칭되는 템플릿이 둘 이상일 때, 우선순위가 더 높은 템플릿 적용|
+|template|새로 생성되는 인덱스에 적용되는 settings, mappings 같은 인덱스 설정 정의|
+
+템플릿을 생성한 다음 **새로 만들어지는 인덱스들만 영향**을 받고, **이미 존재하던 템플릿은 패턴이 일치하더라도 적용되지 않습니다.** 그러므로, 패턴에 맞는 새로운 인덱스를 생성하여 **템플릿이 적용**되는 것을 확인해보도록 하겠습니다.
+
+```bash
+PUT test_index1/_doc/1
+{
+  "name": "kim",
+  "age": 10,
+  "gender": "male"
+}
+```
+
+`GET test_index1/_mapping`을 통해 `test_template` 템플릿이 적용되었는지 확인해보면, 아래와 같이 정상적으로 적용된 것을 확인할 수 있습니다.
+
+```json
+{
+  "test_index1" : {
+    "mappings" : {
+      "properties" : {
+        "age" : {
+          "type" : "short"
+        },
+        "gender" : {
+          "type" : "keyword"
+        },
+        "name" : {
+          "type" : "text"
+        }
+      }
+    }
+  }
+}
+```
+
+이번에는 템플릿 매핑 값과 다른 타입으로 도큐먼트 인덱싱을 해보도록 하겠습니다.
+
+```bash
+PUT test_index2/_doc/1
+{
+  "name": "lee",
+  "age": "19 years"
+}
+```
+
+위 명령어를 실행하면 아래와 같이 `400` 상태 오류와 함께 문제가 발생한 이유를 알려줍니다.
+
+```json
+{
+  "error" : {
+    "root_cause" : [
+      {
+        "type" : "mapper_parsing_exception",
+        "reason" : "failed to parse field [age] of type [short] in document with id '1'. Preview of field's value: '19 years'"
+      }
+    ],
+    "type" : "mapper_parsing_exception",
+    "reason" : "failed to parse field [age] of type [short] in document with id '1'. Preview of field's value: '19 years'",
+    "caused_by" : {
+      "type" : "number_format_exception",
+      "reason" : "For input string: \"19 years\""
+    }
+  },
+  "status" : 400
+}
+```
+
+이렇듯 인덱스 템플릿을 사용하면, **사용자 실수를 막아주고 반복적인 작업을 줄여줍니다.** 실제로, 특정 날짜/시간 별로 인덱스를 만드는 경우, 로그스태시나 비츠 같은 데이터 수집 툴에서 엘라스틱서치로 데이터를 보낼 때 템플릿을 이용해 인덱스를 생성하는 경우가 많습니다.
+
+이번에는 **템플릿을 삭제**해보도록 하겠습니다.
+
+```bash
+DELETE _index_template/test_template
+```
+
+위 명령어를 이용해 `test_template`를 삭제해도 **기존 인덱스들은 영향을 받지 않습니다.** 이미 만들어진 인덱스들이 변경되는 것이 아닌 단순히 템플릿이 지워지는 것이기 때문입니다.
+
+### 3.7.3 템플릿 우선순위
+`priority`를 이용해 복수의 템플릿이 매칭될 경우 우선순위를 정할 수 있습니다. 실습을 통해 살펴보겠습니다.
+
+먼저 우선순위가 다른 템플릿을 두 개 생성합니다.
+
+```bash
+PUT _index_template/multi_template1
+{
+  "index_patterns": "multi_*",
+  "priority": 1,
+  "template": {
+    "mappings": {
+      "properties": {
+        "age": {"type": "integer"},
+        "name": {"type": "text"}
+      }
+    }
+  }
+}
+```
+
+```bash
+PUT _index_template/multi_template2
+{
+  "index_patterns": "multi_data_*",
+  "priority": 2,
+  "template": {
+    "mappings": {
+      "properties": {
+        "name": {"type": "keyword"}
+      }
+    }
+  }
+}
+```
+
+그 다음 두 템플릿의 패턴에 모두 일치하는 인덱스를 하나 생성합니다.
+
+```bash
+PUT multi_data_index
+```
+
+그 다음 `GET multi_data_index/_mapping`을 통해 확인해보면 `multi_template2` 템플릿이 적용된 것을 알 수 있습니다.
+
+```json
+{
+  "multi_data_index" : {
+    "mappings" : {
+      "properties" : {
+        "name" : {
+          "type" : "keyword"
+        }
+      }
+    }
+  }
+}
+```
+
 
 > 본 게시글은 [엘라스틱 스택 개발부터 운영까지](https://product.kyobobook.co.kr/detail/S000001932755) 도서를 참고하여 작성되었습니다.
 >
