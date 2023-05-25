@@ -1005,8 +1005,126 @@ POST _analyze
 |:-------------:|:-------------------------------------------------------------------------------------------------------------------------------------|
 |   standard    | 스탠다드 분석기가 사용하는 토크나이저. 쉼표(,)나 점(.) 같은 기호를 제거하며, 텍스트 기반으로 토큰화                                                                          |
 |   lowercase   | 텍스트 기반으로 토큰화. 모든 문자를 소문자로 변경                                                                                                         |
-|     ngram     | 원문으로부터 N개의 연속된 글자 단위 모두 토큰화. 예를 들어, '엘라스틱'이라는 원문을 2gram으로 토큰화하면 [엘라, 라스, 스틱]과 같이 연속된 두 글자 모두 추출. 저장 공간을 많이 차지하며 N개 이하의 글자 수로는 검색 불가능 |
+|     ngram     | 원문으로부터 N개의 연속된 글자 단위 모두 토큰화. 저장 공간을 많이 차지하며 N개 이하의 글자 수로는 검색 불가능 |
 | uax_url_email | 스탠다드 분석기와 유사하지만 URL이나 이메일을 토큰화하는 데 강점이 있음                                                                                            |
+`ngram`은 **최소 몇 글자부터 최대 몇 글자로 토큰을 생성**하겠다고 지정할 수 있습니다. 그렇기 때문에 저장 공간을 많이 차지합니다. **기본적으로** 최소 글자와 최대 글자의 차이는 `1`보다 작거나 같아야 하며, **최대 글자 수를 변경**하려면 `index.max_ngram_diff` 인덱스 레벨 설정을 변경해야 합니다. 
+
+다음과 같이 최소 2글자, 최대 4글자의 토큰이 생성되도록 설정해보겠습니다.
+
+```bash
+PUT my_ngram
+{
+  "settings": {
+    "index": {
+      "max_ngram_diff": 4
+    },
+    "analysis": {
+      "filter": {
+        "my_ngram_2_to_4": {
+          "type": "ngram",
+          "min_gram": 2,
+          "max_gram": 4
+        }
+      }
+    }
+  }
+}
+```
+
+그 다음, 생성한 `ngram` 토크나이저를 사용해 생성되는 토큰을 확인해봅시다. 실행할 때, `tokenizer`를 `keyword`로 설정해야 합니다.
+
+```bash
+GET my_ngram/_analyze
+{
+  "tokenizer": "keyword",
+  "filter": ["my_ngram_2_to_4"],
+  "text": "tree"
+}
+```
+
+실행시켜보면, "tr", "tre", "tree", "re" 이런 식으로 2개에서 4개의 길이를 가진 토큰이 생성된 것을 확인할 수 있습니다.
+
+```json
+{
+  "tokens" : [
+    {
+      "token" : "tr",
+      "start_offset" : 0,
+      "end_offset" : 4,
+      "type" : "word",
+      "position" : 0
+    },
+    {
+      "token" : "tre",
+      "start_offset" : 0,
+      "end_offset" : 4,
+      "type" : "word",
+      "position" : 0
+    },
+    {
+      "token" : "tree",
+      "start_offset" : 0,
+      "end_offset" : 4,
+      "type" : "word",
+      "position" : 0
+    },
+    {
+      "token" : "re",
+      "start_offset" : 0,
+      "end_offset" : 4,
+      "type" : "word",
+      "position" : 0
+    },
+    {
+      "token" : "ree",
+      "start_offset" : 0,
+      "end_offset" : 4,
+      "type" : "word",
+      "position" : 0
+    },
+    {
+      "token" : "ee",
+      "start_offset" : 0,
+      "end_offset" : 4,
+      "type" : "word",
+      "position" : 0
+    }
+  ]
+}
+```
+
+이번에는 `uax_url_email` 토크나이저를 사용해보도록 하겠습니다.
+
+```bash
+GET _analyze
+{
+  "tokenizer": "uax_url_email",
+  "text": "2504sb@gmail.com https://www.elastic.co"
+}
+```
+
+실행 결과, email과 url을 구분하여 저장하는 것을 확인할 수 있습니다.
+
+```json
+{
+  "tokens" : [
+    {
+      "token" : "2504sb@gmail.com",
+      "start_offset" : 0,
+      "end_offset" : 16,
+      "type" : "<EMAIL>",
+      "position" : 0
+    },
+    {
+      "token" : "https://www.elastic.co",
+      "start_offset" : 17,
+      "end_offset" : 39,
+      "type" : "<URL>",
+      "position" : 1
+    }
+  ]
+}
+```
 
 ### 3.8.3. 필터
 
@@ -1019,11 +1137,42 @@ POST _analyze
 
 캐릭터 필터를 사용하기 위해서는 **커스텀 분석기를 만들어 사용**하는 것이 좋습니다.
 
+HTML 문법을 제거/변경하는 `html_strip`을 사용해보도록 하겠습니다. 다음과 같이 캐릭터 필터에 추가하고, 텍스트 내에 HTML 문법을 추가한 다음 실행해봅시다.
+
+```bash
+POST _analyze
+{
+  "tokenizer": "keyword",
+  "char_filter": [
+    "html_strip"
+    ],
+    "text": "<p>I&apos;m so <b>happy</b>!</p>"
+}
+```
+
+그러면 HTML 문법인 `<>`로 된 태그를 제거하고 `&apos;` 와 같은 HTML 문법 용어들도 해석한 결과를 반환합니다.
+
+```json
+{
+  "tokens" : [
+    {
+      "token" : """
+I'm so happy!
+""",
+      "start_offset" : 0,
+      "end_offset" : 32,
+      "type" : "word",
+      "position" : 0
+    }
+  ]
+}
+```
+
 #### 3.8.3.2. 토큰 필터
 토큰 필터는 **토크나이저에 의해 토큰화되어 있는 문자들에 필터를 적용**합니다.
 토큰들을 변경하거나 추가, 삭제하는 작업이 가능합니다.
 
-자주 사용하는 토큰 필터는 다음과 같습니다.
+자주 사용하는 토큰 필터는 다음과 같습니다. 참고로, stemmer 분석기와 stop 분석기는 영어 기반이기 때문에 한글 텍스트에서 잘 동작하지 않습니다.
 
 |    필터     | 설명                        |
 |:---------:|:--------------------------|
@@ -1032,7 +1181,71 @@ POST _analyze
 |  stemmer  | 영어 문법을 분석하는 필터            |
 |   stop    | 기본 필터에서 제거하지 못하는 특정 단어 제거 |
 
-참고로, stemmer 분석기와 stop 분석기는 영어 기반이기 때문에 한글 텍스트에서 잘 동작하지 않습니다.
+`stemmer` 필터는 영어 문법을 분석한다고 하는데, 정확히 어떤 결과를 반환하는 것인지 짐작이 되지 않을 수 있으므로 실습을 통해 살펴보도록 하겠습니다.
+
+아래의 stemmer 필터를 사용한 예제를 실행시켜 봅시다.
+
+```bash
+POST _analyze
+{
+  "tokenizer": "standard",
+  "filter": ["stemmer"],
+  "text": "The 10 most loving dog breeds"
+}
+```
+
+실행 결과를 보면 `loving`은 `love`로, `breeds`는 `breed`로 토큰이 생성된 것을 확인할 수 있습니다. 이를 통해 stemmer 필터는 형태소를 분석해 어간을 분석해 토큰을 생성한다는 것을 알 수 있습니다.
+
+```json
+{
+  "tokens" : [
+    {
+      "token" : "The",
+      "start_offset" : 0,
+      "end_offset" : 3,
+      "type" : "<ALPHANUM>",
+      "position" : 0
+    },
+    {
+      "token" : "10",
+      "start_offset" : 4,
+      "end_offset" : 6,
+      "type" : "<NUM>",
+      "position" : 1
+    },
+    {
+      "token" : "most",
+      "start_offset" : 7,
+      "end_offset" : 11,
+      "type" : "<ALPHANUM>",
+      "position" : 2
+    },
+    {
+      "token" : "love",
+      "start_offset" : 12,
+      "end_offset" : 18,
+      "type" : "<ALPHANUM>",
+      "position" : 3
+    },
+    {
+      "token" : "dog",
+      "start_offset" : 19,
+      "end_offset" : 22,
+      "type" : "<ALPHANUM>",
+      "position" : 4
+    },
+    {
+      "token" : "breed",
+      "start_offset" : 23,
+      "end_offset" : 29,
+      "type" : "<ALPHANUM>",
+      "position" : 5
+    }
+  ]
+}
+```
+
+
 
 ### 3.8.4. 커스텀 분석기
 커스텀 분석기는 엘라스틱서치에서 제공하는 내장 분석기들 중 원하는 기능을 만족하는 분석기가 없을 때 사용자가 **직접 토크나이저, 필터 등을 조합해 사용할 수 있는 분석기**입니다.
@@ -1141,6 +1354,72 @@ GET custom_analyzer/_analyze
 }
 ```
 
+이번에는 캐릭터 필터를 사용하여 특정 단어를 다른 단어로 치환해보도록 하겠습니다.
+
+```bash
+PUT dev_language_analyzer
+{
+  "settings": {
+    "analysis": {
+      "char_filter": {
+        "cpp_char_filter": {
+          "type": "mapping",
+          "mappings": ["+ => _plus"]
+        }
+      },
+      "analyzer": {
+        "dev_language": {
+          "type": "custom",
+          "char_filter": ["cpp_char_filter"],
+          "tokenizer": "whitespace",
+          "filter": ["lowercase"]
+        }
+      }
+    }
+  }
+}
+```
+
+공백을 기준으로 토큰을 나누고, `+`를 `_plus`로 치환하며, 소문자로 변경하도록 커스텀 분석기를 생성했습니다. 아래 명령어를 실행하여 `C++`이 `c_plus_plus`가 되는지 확인해봅시다.
+
+```bash
+GET dev_language_analyzer/_analyze
+{
+  "analyzer": "dev_language",
+  "text": "C++ Java python"
+}
+```
+
+실행시켜보면 예상한대로 결과가 나오는 것을 확인할 수 있습니다.
+
+```json
+{
+  "tokens" : [
+    {
+      "token" : "c_plus_plus",
+      "start_offset" : 0,
+      "end_offset" : 3,
+      "type" : "word",
+      "position" : 0
+    },
+    {
+      "token" : "java",
+      "start_offset" : 4,
+      "end_offset" : 8,
+      "type" : "word",
+      "position" : 1
+    },
+    {
+      "token" : "python",
+      "start_offset" : 9,
+      "end_offset" : 15,
+      "type" : "word",
+      "position" : 2
+    }
+  ]
+}
+```
+
 > 본 게시글은 [엘라스틱 스택 개발부터 운영까지](https://product.kyobobook.co.kr/detail/S000001932755) 도서를 참고하여 작성되었습니다.
 >
 > 상세한 내용이 궁금하시다면 책을 읽어보실 것을 추천해 드립니다.
@@ -1149,3 +1428,4 @@ GET custom_analyzer/_analyze
 추가로 참고한 내용
 - <https://www.ibm.com/kr-ko/topics/rest-apis>
 - <https://www.elastic.co/guide/en/elasticsearch/reference/7.10/cat.html>
+- <https://velog.io/@hanblueblue/Elastic-Search-3>
