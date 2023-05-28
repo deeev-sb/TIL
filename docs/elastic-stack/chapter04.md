@@ -426,6 +426,304 @@ boost는 엘라스틱이 지정한 고정값으로 2.2로 정해져 있습니다
    - 쿼리를 조합해 사용되는 쿼리
    - 논리(bool) 쿼리 등
 
+### 4.4.1. 전문 쿼리와 용어 수준 쿼리
+
+**전문 쿼리**는 전문 검색을 하기 위해 사용되며,
+주로 텍스트 타입 필드에서 검색어를 찾을 때 사용합니다.
+
+**전문 쿼리의 동작 과정**을 살펴보도록 하겠습니다.
+
+<img width="441" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/ec09e99b-d9f5-46e9-8aa2-a596a37beb0c">
+
+그림과 같이 qindex 인덱스를 생성하면, contents 필드는 텍스트 타입이기 때문에 "I Love Elastic Stack." 이라는 문자열은 표와 같이 [i, love, elastic, stack]으로 토큰화가 됩니다.
+
+검색을 위한 도큐먼트가 준비되었으니 매치(match) 쿼리를 사용해 "elastic world"를 전문 검색합니다.
+그러면 검색어인 "elastic world"는 [elastic, world]로 토큰화되고, 토큰화된 도큐먼트 용어들과 매칭되어 스코어 계산 후 검색을 합니다.
+
+이러한 전문 쿼리에는 매치 쿼리 (match query), 매치 프라이즈 쿼리 (match phrase query), 멀티 매치 쿼리 (multi-match query), 쿼리 스트링 쿼리 (query string query) 등이 있습니다.
+
+그 다음으로 용어 수준 쿼리에 대해 살펴보겠습니다.
+
+**용어 수준 쿼리**는 정확히 일치하는 용어를 찾기 위해 사용되며,
+주로 키워드, 숫자형, 범위형 타입의 필드에서 검색어를 찾을 때 사용합니다.
+
+**용어 수준 쿼리의 동작 과정**을 살펴보도록 하겠습니다.
+
+<img width="439" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/b5973df9-2216-4dcc-8066-49f486e25ee5">
+
+그림과 같이 qindex 인덱스를 생성하면, category 필드는 키워드 타입이기 때문에 "Tech"를 그대로 인덱싱합니다.
+
+검색을 위한 도큐먼트가 준비되었으니 용어(term) 쿼리를 사용해 "tech"를 검색합니다.
+검색어인 "tech"와 도큐먼트의 "Tech"는 대소문자의 차이로 인해 매칭에 실패합니다.
+이렇듯 용어 수준 쿼리는 정확히 일치하지 않으면 결과로 반환하지 않으며,
+관계형 데이터베이스의 WHERE 절과 비슷한 역할을 한다고 이해하면 됩니다.
+
+이러한 용어 수준 쿼리에는 용어 쿼리 (term query), 용어들 쿼리 (terms query), 퍼지 쿼리 (fuzzy query) 등이 있습니다.
+
+## 4.4.2. 매치 쿼리
+
+매치 쿼리는 **대표적인 전문 쿼리**로, 특정 용어나 용어들을 검색할 때 사용합니다.
+
+**하나의 용어를 검색**할 때는 아래와 같이 필드와 용어 하나만 작성하면 됩니다.
+여기서는 `Mary`라는 단어를 검색했으며, Mary는 [mary]로 토큰화되어 검색됩니다.
+
+```bash
+GET kibana_sample_data_ecommerce/_search
+{
+  "_source": ["customer_full_name"],
+  "query": {
+    "match": {
+      "customer_full_name": "Mary"
+    }
+  }
+}
+```
+
+참고로, `_source` 파라미터는 검색 결과에서 지정한 특정 필드만 보여줍니다.
+그렇기에 아래와 같이 결과는 `customer_full_name`에 대해서만 출력합니다.
+
+```json
+{
+  // ...
+  "hits" : {
+    "total" : {
+      "value" : 154,
+      "relation" : "eq"
+    },
+    "max_score" : 3.4912553,
+    "hits" : [
+      {
+        "_index" : "kibana_sample_data_ecommerce",
+        "_type" : "_doc",
+        "_id" : "hd1mU4gBbg2lvvgijQi-",
+        "_score" : 3.4912553,
+        "_source" : {
+          "customer_full_name" : "Mary Bailey"
+        }
+      },
+      // ...
+    ]
+  }
+}
+```
+
+복수 개의 용어를 검색하고 싶다면 두 용어를 입력하면 됩니다.
+
+```bash
+GET kibana_sample_data_ecommerce/_search
+{
+  "_source": ["customer_full_name"],
+  "query": {
+    "match": {
+      "customer_full_name": "mary bailey"
+    }
+  }
+}
+```
+
+이 때, 공백을 `OR`로 인식하여 두 단어 중 하나라도 포함되면 결과에 포함하여 반환합니다.
+
+```json
+{
+  // ...
+  "hits" : {
+    "total" : {
+      "value" : 169,
+      "relation" : "eq"
+    },
+    "max_score" : 9.155506,
+    "hits" : [
+      {
+        // ...
+        "_source" : {
+          "customer_full_name" : "Mary Bailey"
+        }
+      },
+      {
+        // ...
+        "_source" : {
+          "customer_full_name" : "Elyssa Bailey"
+        }
+      }
+      // ...
+    ]
+  }
+}
+```
+
+두 단어 모두 포함된 도큐먼트가 매칭된 결과를 알고 싶다면 `operator`라는 파라미터를 변경하면 됩니다.
+operator의 기본 값은 OR 이기 때문에 아래와 같이 따로 입력해주지 않으면 위와 같은 결과를 반환하게 됩니다.
+
+```bash
+GET kibana_sample_data_ecommerce/_search
+{
+  "_source": ["customer_full_name"],
+  "query": {
+    "match": {
+      "customer_full_name": {
+        "query": "mary bailey",
+        "operator": "and"
+      }
+    }
+  }
+}
+```
+
+### 4.4.3. 매치 프레이즈 쿼리
+
+매치 프레이즈 쿼리는 **구(phrase)를 검색할 때 사용**합니다.
+구는 동사가 아닌 2개 이상의 단어가 연결되어 만들어지는 단어입니다.
+그렇기에 검색하는 **단어 순서도 중요**합니다.
+예를 들어, '빨간색 바지'를 찾으려고 했는데 '바지 빨간색'이라고 입력하면, 원하지 않은 전혀 다른 결과를 얻게 됩니다.
+
+```bash
+GET kibana_sample_data_ecommerce/_search
+{
+  "_source": ["customer_full_name"],
+  "query": {
+    "match_phrase": {
+      "customer_full_name": "mary bailey"
+    }
+  }
+}
+```
+
+위와 같이 입력하면, 순서가 바뀐 'bailey mary'나 중간에 다른 단어가 포함된 'mary tony bailey'와 같은 단어는 매칭되지 않습니다.
+
+### 4.4.4. 용어 쿼리
+
+용어 쿼리는 **용어 수준 쿼리의 대표적인 쿼리**입니다.
+분석기를 거치지 않기 때문에 대소문자까지 정확히 일치하는 용어에 대해서만 매칭됩니다.
+
+```bash
+GET kibana_sample_data_ecommerce/_search
+{
+  "_source": ["customer_full_name"],
+  "query": {
+    "term": {
+      "customer_full_name": "Mary Bailey"
+    }
+  }
+}
+```
+
+검색해보면 아래와 같이 아무런 결과도 반환되지 않는 것을 확인할 수 있습니다.
+이는 `Mary Bailey`를 `Mary`로 변경하더라도 똑같습니다.
+
+```json
+{
+  // ...
+  "hits" : {
+    "total" : {
+      "value" : 0,
+      "relation" : "eq"
+    },
+    "max_score" : null,
+    "hits" : [ ]
+  }
+}
+```
+
+그 이유는 `customer_full_name`이 텍스트와 키워드 타입을 갖는 멀티 필드로 지정되어 있기 때문입니다.
+`customer_full_name` 필드는 텍스트 타입이고, `customer_full_name.keyword` 필드가 키워드 타입입니다.
+그러므로 키워드 타입인 `customer_full_name.keyword` 필드에 용어 쿼리를 요청해야 결과를 얻을 수 있습니다.
+
+```bash
+GET kibana_sample_data_ecommerce/_search
+{
+  "_source": ["customer_full_name"],
+  "query": {
+    "term": {
+      "customer_full_name.keyword": "Mary Bailey"
+    }
+  }
+}
+```
+
+용어 쿼리를 요청하면 아래와 유사한 결과를 확인할 수 있습니다.
+
+```json
+{
+  // ...
+  "hits" : {
+    "total" : {
+      "value" : 3,
+      "relation" : "eq"
+    },
+    "max_score" : 7.1974354,
+    "hits" : [
+      {
+        // ...
+        "_source" : {
+          "customer_full_name" : "Mary Bailey"
+        }
+      },
+      {
+        // ...
+        "_source" : {
+          "customer_full_name" : "Mary Bailey"
+        }
+      },
+      {
+        // ...
+        "_source" : {
+          "customer_full_name" : "Mary Bailey"
+        }
+      }
+    ]
+  }
+}
+```
+
+### 4.4.5. 용어들 쿼리
+
+용어들 쿼리는 용어 수준 쿼리의 일종이며, **여러 용어들을 검색**할 수 있습니다.
+**키워드 타입으로 매핑된 필드에서 사용**해야 하며, **대소문자도 신경** 써야 합니다.
+
+```bash
+GET kibana_sample_data_ecommerce/_search
+{
+  "_source": ["day_of_week"],
+  "query": {
+    "terms": {
+      "day_of_week": ["Monday", "Sunday"]
+    }
+  }
+}
+```
+
+위와 같이 입력하면 `day_of_week` 필드가 `Monday`이거나 `Sumday`인 필드가 반환됩니다.
+
+```json
+{
+  // ...
+  "hits" : {
+    "total" : {
+      "value" : 1193,
+      "relation" : "eq"
+    },
+    "max_score" : 1.0,
+    "hits" : [
+      {
+        // ...
+        "_score" : 1.0,
+        "_source" : {
+          "day_of_week" : "Monday"
+        }
+      },
+      {
+        // ...
+        "_score" : 1.0,
+        "_source" : {
+          "day_of_week" : "Sunday"
+        }
+      },
+      // ...
+    ]
+  }
+}
+```
+
 
 > 본 게시글은 [엘라스틱 스택 개발부터 운영까지](https://product.kyobobook.co.kr/detail/S000001932755) 도서를 참고하여 작성되었습니다.
 >
