@@ -1507,6 +1507,47 @@ GET kibana_sample_data_ecommerce/_search
 `[a-z]`는 a와 z 사이의 문자가 매칭되며, `[^a]`는 a가 아닌 다른 문자가 오면 매칭됩니다.
 그렇기에 `[^a]abcd`는 첫 문자가 a가 아니게 되고, `aabbcd`의 첫 문자는 a여서 매칭에 실패합니다.
 
+정규식 쿼리는 다음과 같은 형식으로 작성합니다.
+
+```bash
+GET kibana_sample_data_ecommerce/_search
+{
+  "_source": "customer_first_name",
+  "query": {
+    "regexp": {
+      "customer_first_name.keyword": "Mar."
+    }
+  }
+}
+```
+
+그러면 다음과 같으 `Mar.`에 해당하는 검색 결과가 출력됩니다.
+
+```json
+{
+  // ...
+  "hits" : {
+    "total" : {
+      "value" : 154,
+      "relation" : "eq"
+    },
+    "max_score" : 1.0,
+    "hits" : [
+      {
+        "_index" : "kibana_sample_data_ecommerce",
+        "_type" : "_doc",
+        "_id" : "hd1mU4gBbg2lvvgijQi-",
+        "_score" : 1.0,
+        "_source" : {
+          "customer_first_name" : "Mary"
+        }
+      },
+     // ...
+    ]
+  }
+}
+```
+
 > 본 게시글은 [엘라스틱 스택 개발부터 운영까지](https://product.kyobobook.co.kr/detail/S000001932755) 도서를 참고하여 작성되었습니다.
 >
 > 상세한 내용이 궁금하시다면 책을 읽어보실 것을 추천해 드립니다.
