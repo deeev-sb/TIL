@@ -919,9 +919,593 @@ GET range_test_index/_search
 |     contains     | 도큐먼트의 범위 데이터가 쿼리 범위 값을 **모두** 포함해야 함       |
 |      within      | 도큐먼트의 범위 데이터가 쿼리 범위 **값 내에 전부 속해야 함**      |
 
+위 표에 대한 내용을 그림으로 표현하면 다음과 같습니다. 조금 더 이해하기 쉽도록 숫자형 범위를 사용하였습니다.
 
+<img width="435" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/23de3ff7-a34c-490d-8f62-920539c4a6cf">
 
+### 4.4.8. 논리 쿼리
 
+논리 쿼리는 **복합 쿼리(compound query)**로, 앞에서 배웠던 쿼리를 조합할 수 있습니다.
+
+논리 쿼리 작성 포맷은 다음과 같습니다.
+
+```bash
+GET <index>/_search
+{
+  "query": {
+    "bool" : {
+      "must" : [{쿼리문}, ...],
+      "must not" : [{쿼리문}, ...],
+      "should" : [{쿼리문}, ...],
+      "filter" : [{쿼리문}, ...]
+    }
+  }
+}
+```
+
+여기서 사용된 타입은 총 4개로, 전문 쿼리나 용어 수준 쿼리, 범위 쿼리, 지역 쿼리 등을 사용할 수 있습니다.
+
+|    타입    | 설명                              |
+|:--------:|:--------------------------------|
+|   must   | 쿼리를 실행하여 참인 도큐먼트 검색             |
+|          | 복수의 쿼리를 실행하면 AND 연산             |
+| must_not | 쿼리를 실행하여 거짓인 도큐먼트 검색            |
+|          | 다른 타입과 같이 사용할 경우 도큐먼트에서 제외      |
+|  should  | 단독으로 사용 시 쿼리를 실행하여 참인 도큐먼트 검색   |
+|          | 복수의 쿼리를 실행하면 OR 연산              |
+|          | 다른 타입과 같이 사용할 경우, 스코어에만 활용      |
+|  filter  | 쿼리를 실행하여 "예/아니오" 형식의 필터 컨텍스트 수행 |
+
+각 타입에 대해서 예제와 함께 살펴보도록 하겠습니다.
+
+#### 4.4.8.1. must 타입
+must 타입은 **쿼리를 실행하고 참인 도큐먼트**를 찾습니다.
+
+다음과 같이 작성하면 `customer_first_name` 필드에 `mary`가 들어간 도큐먼트를 검색합니다.
+
+```bash
+GET kibana_sample_data_ecommerce/_search
+{ 
+  "_source": ["customer_first_name"], 
+  "query": {
+    "bool": {
+      "must" : {
+        "match" : {"customer_first_name": "mary"}
+      }
+    }
+  }
+}
+```
+
+실행 결과를 살펴보면 다음과 같이 `mary`가 들어간 도큐먼트가 검색된 것을 확인할 수 있습니다.
+
+```json
+{
+   // ...
+  "hits" : {
+     "total": {
+        "value": 154,
+        "relation": "eq"
+     },
+     "max_score": 3.5671005,
+     "hits": [
+        {
+           "_index": "kibana_sample_data_ecommerce",
+           "_type": "_doc",
+           "_id": "hd1mU4gBbg2lvvgijQi-",
+           "_score": 3.5671005,
+           "_source": {
+              "customer_first_name": "Mary"
+           }
+        },
+        // ...
+     ]
+  }
+}
+```
+
+아래와 같이 **복수 개의 쿼리를 실행하면 AND 효과**를 얻을 수 있습니다.
+
+```bash
+GET kibana_sample_data_ecommerce/_search
+{ 
+  "_source": ["customer_first_name"], 
+  "query": {
+    "bool": {
+      "must" : [
+        {"term": {"day_of_week": "Sunday"}},
+        {"match" : {"customer_first_name": "mary"}}
+      ]
+    }
+  }
+}
+```
+
+실행해보면 다음과 같이 `day_of_week`가 `Sunday`면서 `customer_first_name`이 `mary`인 것을 출력하는 것을 확인할 수 있습니다.
+
+```json
+{
+  // ...
+  "hits" : {
+    "total" : {
+      "value" : 15,
+      "relation" : "eq"
+    },
+    "max_score" : 5.59649,
+    "hits" : [
+      {
+        "_index" : "kibana_sample_data_ecommerce",
+        "_type" : "_doc",
+        "_id" : "hd1mU4gBbg2lvvgijQi-",
+        "_score" : 5.59649,
+        "_source" : {
+          "customer_first_name" : "Mary",
+          "day_of_week" : "Sunday"
+        }
+      }, // ...
+    ]
+  }
+}
+```
+
+#### 4.4.8.2 must_not 타입
+
+must_not 타입은 **도쿠먼트에서 제외할 쿼리를 실행**합니다.
+
+```bash
+GET kibana_sample_data_ecommerce/_search
+{ 
+  "_source": ["customer_first_name"], 
+  "query": {
+    "bool": {
+      "must_not" : {
+        "match" : {"customer_first_name": "mary"}
+      }
+    }
+  }
+}
+```
+
+실행해보면, `customer_first_name` 필드가 `mary`라는 용어를 가지지 않는 도큐먼트만 출력하는 것을 확인할 수 있습니다.
+
+```json
+{
+  // ...
+  "hits" : {
+    "total" : {
+      "value" : 4521,
+      "relation" : "eq"
+    },
+    "max_score" : 0.0,
+    "hits" : [
+      {
+        "_index" : "kibana_sample_data_ecommerce",
+        "_type" : "_doc",
+        "_id" : "hN1mU4gBbg2lvvgijQi-",
+        "_score" : 0.0,
+        "_source" : {
+          "customer_first_name" : "Eddie"
+        }
+      },
+      // ...
+    ]
+  }
+}
+```
+
+이러한 must_not을 다른 쿼리와 함께 사용하면 **특정 조건의 쿼리를 제외**할 수 있습니다.
+
+```bash
+GET kibana_sample_data_ecommerce/_search
+{ 
+  "_source": ["customer_first_name", "customer_last_name"], 
+  "query": {
+    "bool": {
+      "must" : {
+        "match" : {"customer_first_name": "mary"}
+      },
+      "must_not": {
+        "term": {"customer_last_name": "bailey"}
+      }
+    }
+  }
+}
+```
+
+실행해보면 다음과 같이 `bailey`가 포함되지 않은 단어만 출력함을 확인할 수 있습니다.
+
+```json
+{
+  // ...
+  "hits" : {
+    "total" : {
+      "value" : 151,
+      "relation" : "eq"
+    },
+    "max_score" : 3.5671005,
+    "hits" : [
+      {
+        "_index" : "kibana_sample_data_ecommerce",
+        "_type" : "_doc",
+        "_id" : "mt1mU4gBbg2lvvgijQi-",
+        "_score" : 3.5671005,
+        "_source" : {
+          "customer_last_name" : "Barber",
+          "customer_first_name" : "Mary"
+        }
+      }, 
+      // ...
+    ]
+  }
+}
+```
+
+#### 4.4.8.3. should 타입
+
+should 타입에 **하나의 쿼리를 사용**한다면, **must 타입과 같은 결과**를 얻을 수 있습니다.
+
+```bash
+GET kibana_sample_data_ecommerce/_search
+{ 
+  "_source": ["customer_first_name"], 
+  "query": {
+    "bool": {
+      "should": {
+        "match" : {"customer_first_name": "mary"}
+      }
+    }
+  }
+}
+```
+
+위 명령어의 실행 결과는 이전에 보았던 must 타입의 결과와 같으므로 생략하였습니다.
+
+이러한 should 타입에 **복수 개의 쿼리를 사용하면 OR 효과**를 얻을 수 있습니다.
+
+```bash
+GET kibana_sample_data_ecommerce/_search
+{ 
+  "_source": ["day_of_week", "customer_first_name"], 
+  "query": {
+    "bool": {
+      "should" : [
+        {"term": {"day_of_week": "Sunday"}},
+        {"match" : {"customer_first_name": "mary"}}
+      ]
+    }
+  }
+}
+```
+
+실행해보면 다음과 같이 `day_of_week`가 `Sunday` 이거나 `customer_first_name`이 `mary`인 값이 조회된 것을 확인할 수 있습니다.
+이전에 똑같은 조건에 대해 `must`로 조회했을 때는 15개의 결과가 조회되었는데, `should`로 하니 753개나 되는 검색 결과가 나옵니다.
+
+```json
+{
+  // ...
+  "hits" : {
+    "total" : {
+      "value" : 753,
+      "relation" : "eq"
+    },
+    "max_score" : 5.59649,
+    "hits" : [
+      {
+        "_index" : "kibana_sample_data_ecommerce",
+        "_type" : "_doc",
+        "_id" : "hd1mU4gBbg2lvvgijQi-",
+        "_score" : 5.59649,
+        "_source" : {
+          "customer_first_name" : "Mary",
+          "day_of_week" : "Sunday"
+        }
+      }, 
+      // ...
+    ]
+  }
+}
+```
+
+should 타입을 **다른 타입과 함께 사용**하는 경우, `should`에서 검색한 조건에 맞는 도큐먼트들의 우선순위를 높입니다.
+
+비교를 위해 먼저 `must`를 단독으로 사용해보겠습니다.
+
+```bash
+GET kibana_sample_data_ecommerce/_search
+{ 
+  "_source": ["day_of_week", "customer_first_name"], 
+  "query": {
+    "bool": {
+      "must" : {
+        "match" : {"customer_first_name": "mary"}
+      }
+    }
+  }
+}
+```
+
+검색했을 때, 첫 번째로 표시되는 결과의 `day_of_week`는 `Sunday` 입니다.
+
+```json
+{
+  // ...
+  "hits" : {
+    "total" : {
+      "value" : 154,
+      "relation" : "eq"
+    },
+    "max_score" : 3.5671005,
+    "hits" : [
+      {
+        "_index" : "kibana_sample_data_ecommerce",
+        "_type" : "_doc",
+        "_id" : "hd1mU4gBbg2lvvgijQi-",
+        "_score" : 3.5671005,
+        "_source" : {
+          "customer_first_name" : "Mary",
+          "day_of_week" : "Sunday"
+        }
+      },
+      // ...
+    ]
+  }
+}
+
+```
+
+이번에는 `should` 타입으로 조건을 추가해보겠습니다.
+
+```json
+GET kibana_sample_data_ecommerce/_search
+{ 
+  "_source": ["day_of_week", "customer_first_name"], 
+  "query": {
+    "bool": {
+      "must" : {
+        "match" : {"customer_first_name": "mary"}
+      },
+      "should": {
+        "term": {"day_of_week": "Monday"}
+      }
+    }
+  }
+}
+```
+
+명령어를 실행해보면, should 조건인 `Monday`가 `day_of_week`인 도큐먼트가 첫 번째 결과로 나오는 것을 확인할 수 있습니다.
+
+```json
+{
+  // ...
+  "hits" : {
+    "total" : {
+      "value" : 154,
+      "relation" : "eq"
+    },
+    "max_score" : 5.6551332,
+    "hits" : [
+      {
+        "_index" : "kibana_sample_data_ecommerce",
+        "_type" : "_doc",
+        "_id" : "3N1mU4gBbg2lvvgijQi-",
+        "_score" : 5.6551332,
+        "_source" : {
+          "customer_first_name" : "Mary",
+          "day_of_week" : "Monday"
+        }
+      },
+      // ...
+    ]
+  }
+}
+```
+
+#### 4.4.8.4. filter 타입
+
+filter는 **must와 같은 동작**을 하지만 **필터 컨텍스트로 동작**하기 때문에 유사도 스코어에 영향을 미치지 않습니다.
+즉, **예/아니오** 두 가지 결과만 제공합니다.
+
+```bash
+GET kibana_sample_data_ecommerce/_search
+{
+  "_source": ["products.base_price"],
+  "query": {
+    "bool": {
+      "filter": {
+        "range": {
+          "products.base_price": {
+            "gte": 30,
+            "lte": 60
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+위와 같이 filter 타입을 사용하고 range 쿼리를 사용하면, 스코어는 계산되지 않아서 `0.0`이고 `products.base_price`가 30 이상 60 이하인 모든 도큐먼트가 검색된 것을 확인할 수 있습니다.
+
+```json
+{
+  // ...
+  "hits" : {
+    "total" : {
+      "value" : 2336,
+      "relation" : "eq"
+    },
+    "max_score" : 0.0,
+    "hits" : [
+      {
+        "_index" : "kibana_sample_data_ecommerce",
+        "_type" : "_doc",
+        "_id" : "iN1mU4gBbg2lvvgijQi-",
+        "_score" : 0.0,
+        "_source" : {
+          "products" : [
+            {
+              "base_price" : 59.99
+            },
+            {
+              "base_price" : 20.99
+            }
+          ]
+        }
+      },
+      // ...
+    ]
+  }
+}
+```
+
+이번에는 filter 타입을 **다른 타입과 같이 사용**해보겠습니다.
+
+```bash
+GET kibana_sample_data_ecommerce/_search
+{ 
+  "_source": ["day_of_week", "customer_first_name"], 
+  "query": {
+    "bool": {
+      "filter": {
+        "term": {"day_of_week": "Sunday"}
+      },
+      "must" : {
+        "match" : {"customer_first_name": "mary"}
+      }
+    }
+  }
+}
+```
+
+이렇게 검색을 하면, 먼저 `day_of_week`가 `Sunday`인 도큐먼트에 대해 필터링을 한 다음 `customer_first_name`이 `mary`인 도큐먼트에 대해 검색을 합니다.
+앞에서 설명 드렸듯 `should` 타입 검색은 유사도 검색을 하지 않기 때문에, 필터를 통해 불필요한 도큐먼트를 제외하고 검색하기 때문에 검색 성능을 높일 수 있습니다.
+
+```json
+{
+  // ...
+  "hits" : {
+    "total" : {
+      "value" : 15,
+      "relation" : "eq"
+    },
+    "max_score" : 3.5671005,
+    "hits" : [
+      {
+        "_index" : "kibana_sample_data_ecommerce",
+        "_type" : "_doc",
+        "_id" : "hd1mU4gBbg2lvvgijQi-",
+        "_score" : 3.5671005,
+        "_source" : {
+          "customer_first_name" : "Mary",
+          "day_of_week" : "Sunday"
+        }
+      },
+      // ... 
+    ]
+  }
+}
+```
+
+### 4.4.9. 패턴 검색
+
+검색하려는 검색어가 길거나 정확히 알지 못하는 경우, 패턴을 이용해 검색할 수 있습니다.
+패턴 검색에는 **와일드카드 쿼리 (wildcard query)**와 **정규식 쿼리(regexp query)**가 있습니다.
+
+#### 4.4.9.1. 와일드카드 쿼리
+
+와일드카드 쿼리는 다음과 같은 특징을 가집니다.
+
+- `*`과 `?`라는 두 가지 기호 사용
+  - `*` : 공백까지 포함하여 글자 수에 상관없이 모든 문자 매칭
+  - `?` : 한 문자만 매칭
+- 용어의 맨 앞에 `*`과 `?`를 사용하면 속도가 매우 느려짐
+
+예제를 통해 자세히 살펴보도록 하겠습니다.
+
+<img width="461" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/7a50d4ec-a5e3-4aca-ae86-55716d9fb68b">
+
+위 그림은 와일드 카드인 `*`를 이용했을 때와 `?` 기호를 사용하였을 때 `aabbcd` 용어와 매칭되거나 되지 않는 케이스에 대해서 보여줍니다.
+
+`*` 기호 하나만 쓰면 어떤 문자가 들어와도 매칭되고, `aabbcd*` 이런식으로 마지막에 `*`을 붙이면 공백이 포함되기 때문에 매칭에 성공합니다.
+그러나 `b*`은 `b`로 시작하는 문자이기 때문에 `a`로 시작되는 `aabbcd`와 매칭되지 않습니다.
+
+`?` 기호는 1개의 문자와 매칭 되기 때문에 문자 길이도 동일해야 합니다. `a?bb??`나 `a???cd`는 문자 길이가 동일하고 `?`가 아닌 부분은 동일하기에 매칭됩니다.
+그러나 `a?`는 두 글자 문자만 매칭될 수 있고, `aabbcd?`는 문자 길이가 달라 매칭되지 않습니다.
+
+와일드카드 쿼리는 다음과 같은 형식으로 작성합니다.
+```bash
+GET kibana_sample_data_ecommerce/_search
+{
+  "_source": "customer_full_name",
+  "query": {
+    "wildcard": {
+      "customer_full_name.keyword": "M?r*"
+    }
+  }
+}
+```
+
+그러면 다음과 같으 `M?r*`에 해당하는 검색 결과가 출력됩니다.
+
+```json
+{
+  // ...
+  "hits" : {
+    "total" : {
+      "value" : 218,
+      "relation" : "eq"
+    },
+    "max_score" : 1.0,
+    "hits" : [
+      {
+        "_index" : "kibana_sample_data_ecommerce",
+        "_type" : "_doc",
+        "_id" : "hd1mU4gBbg2lvvgijQi-",
+        "_score" : 1.0,
+        "_source" : {
+          "customer_full_name" : "Mary Bailey"
+        }
+      },
+     // ...
+    ]
+  }
+}
+```
+
+#### 4.4.9.2. 정규식 쿼리
+
+정규식은 특정한 패턴을 가진 문자열을 표현하기 위한 형식 언어입니다.
+여기서 주의할 점은, 와일드카드에서 사용한 `*`, `?` 기호가 정규식에서는 쓰임이 다르다는 것입니다.
+
+정규식 쿼리에서 자주 사용하는 몇 가지 표현식은 다음과 같습니다.
+
+| 기호  | 설명                                                             |
+|:---:|:---------------------------------------------------------------|
+|  .  | 하나의 문자를 의미. 문자 길이만 맞는다면 어떤 문자가 와도 매칭                           |
+|  +  | 앞 문자와 같은 문자가 한 번 이상 반복되면 매칭                                    |
+|  *  | 앞 문자와 같은 문자가 0번 이상 반복되면 매칭                                     |
+|  ?  | 앞 문자와 같은 문자가 0번 혹은 한 번 나타나면 매칭                                 |
+| ()  | 문자를 그룹핑하여 반복되는 문자들을 매칭. 독자적으로 사용하기 보다는 +, ?, * 같은 기호들과 혼합하여 사용 |
+| []  | 문자를 클래스화하여 특정 범위의 문자들을 매칭                                      |
+
+각 기호에 대해 매칭되는 경우와 매칭되지 않는 경우를 살펴보면 아래 그림과 같습니다.
+
+<img width="557" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/23f41b8a-efee-4440-9746-638336e50e43">
+
+`.`은 하나의 문자를 의미하기 때문에 글자 길이가 다르거나 중간에 비어있는 문자 수가 다르면 매칭을 실패하는 것을 확인할 수 있습니다.
+
+`+`는 앞의 문자를 한 번 이상 반복되면 매칭되는데 `aabbcd`에는 `e`가 존재하지 않아 `aabbcde+`는 매칭 실패합니다.
+
+`*`은 앞 문자와 같은 문자가 0번 이상 반복되면 매칭되기 때문에 왠만해서는 다 매칭되며, 맨 앞에 오는 경우에 대해서 실패합니다.
+`*` 뿐만 아니라 `?`와 `*` 같은 기호도 정규 표현식의 맨 앞에 올 수 없습니다.
+
+`?`는 앞 문자와 같은 문자가 0번 혹은 한 번 나타나면 매칭되므로 `aa?b?b?cd` 같은 경우는 매칭에 성공하지만 `aab?cd`나 `a?b?cd`의 경우는 한 번 나타난다고 하더라도 `aabbcd`를 충족하지 못하기 때문에 매칭에 실패합니다.
+
+`()`는 반복되는 문자들에 대해 매칭되므로, 글자 수가 다르거나 다른 문자가 들어가는 경우에 대해 매칭 실패합니다.
+
+`[]`는 문자를 특정 범위의 문자를 매칭합니다. `[ab]`는 해당 위치에 a 또는 b가 매칭된다는 의미입니다.
+`[a-z]`는 a와 z 사이의 문자가 매칭되며, `[^a]`는 a가 아닌 다른 문자가 오면 매칭됩니다.
+그렇기에 `[^a]abcd`는 첫 문자가 a가 아니게 되고, `aabbcd`의 첫 문자는 a여서 매칭에 실패합니다.
 
 > 본 게시글은 [엘라스틱 스택 개발부터 운영까지](https://product.kyobobook.co.kr/detail/S000001932755) 도서를 참고하여 작성되었습니다.
 >
