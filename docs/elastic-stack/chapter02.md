@@ -120,7 +120,47 @@ docker run --name kibana -d --link elasticsearch:elasticsearch -p 5601:5601 dock
 
 ![image](https://user-images.githubusercontent.com/46712693/234765028-88333315-ea84-4e58-aa1f-50be08546058.png)
 
+## 2.4. Docker Compose 이용하기
+
+`docker-compose.yml`이라는 이름의 파일을 생성하고, 내용을 다음과 같이 작성합니다.
+
+```yaml
+version: '3'
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    ports:
+      - 9200:9200
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.10.2
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - 5601:5601
+```
+
+그 다음 아래 명령어를 통해 Docker Compose를 실행합니다.
+그러면 Docker Compose는 `docker-compose.yml`
+
+```bash
+docker-compose up -d
+```
+
+`-d`는 백그라운드로 명령어를 실행하겠다는 의미입니다.
+
+`docker-compose.yml` 작성과 관련하여 더 자세한 내용이 궁금하시다면, [공식 문서](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-compose-file)를 참고하시길 바랍니다.
+
 > 본 게시글은 [엘라스틱 스택 개발부터 운영까지](https://product.kyobobook.co.kr/detail/S000001932755) 도서를 참고하여 작성되었습니다.
 >
 > 상세한 내용이 궁금하시다면 책을 읽어보실 것을 추천해 드립니다.
 >
+
+추가로 참고한 내용
+- <https://www.elastic.co/guide/en/elasticsearch/reference/7.10/docker.html>
+- <https://www.elastic.co/guide/en/kibana/7.10/docker.html>
