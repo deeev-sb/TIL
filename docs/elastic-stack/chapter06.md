@@ -431,7 +431,7 @@ grok은 dissect와 기타 필터 조합으로 간단하게 해결되지 않는 �
 
 #### 6.3.2.4. 대소문자 변경
 
-이번에는 소문자를 대문자로 바꿔보도록 하겠습니다. `logstash-test.conf` 파일을 다음과 같이 수정합니다.
+이번에는 소문자를 대문자로 바꿔보도록 하겠습니다. `test-logstash.conf` 파일을 다음과 같이 수정합니다.
 
 ```yaml
 filter {
@@ -531,8 +531,302 @@ filter {
 | file          | 지정한 파일의 새로운 줄에 데이터 기록                            |
 | kafka         | 카프카 토픽에 데이터 기록                                   |
 
+여러 출력 플러그인 중 elasticsearch 플러그인을 사용해보도록 하겠습니다.
+`test-logstash.conf` 파일을 다음과 같이 수정해주세요.
 
+```yaml
+input {
+  file {
+    path => "/Users/subin/WorkSpace/TIL/logstash-7.10.2/config/test-input.log"
+    start_position => "beginning"
+    sincedb_path => "/dev/null"
+  }
+}
 
+output {
+  elasticsearch {
+    index => "test-output"
+  }
+}
+```
+
+엘라스틱서치 플러그인의 옵션은 다음과 같습니다.
+
+| 옵션                         | 설명                                                                                                                        |
+|:---------------------------|:--------------------------------------------------------------------------------------------------------------------------|
+| hosts                      | 이벤트를 전송할 엘라스틱서치의 주소                                                                                                       |
+| index                      | 이벤트를 인덱싱할 대상 인덱스                                                                                                          |
+| document_id                | 인덱싱될 문서의 아이디를 직접 지정할 수 있는 옵션                                                                                              |
+| user/password              | 엘라스틱서치에 보안 기능이 활성화되어 있을 때 인증을 위한 사용자 이름과 비밀번호                                                                             |
+| pipeline                   | 엘라스틱서치에 등록된 인제스트 파이프라인을 활용하기 위한 옵션                                                                                        |
+| template</br>template_name | 로그스태시에서 기본 제공되는 인덱스 템플릿 외에 커스텀 템플릿을 사용하기 위한 옵션. template에는 정의한 인덱스 템플릿 파일 경로를, template_name에는 엘라스틱서치에 어떤 이름으로 등록할지 설정 가능 |
+
+설정한 파이프라인을 실행해보면, 엘라스틱서치에 정상적으로 반영된 것을 확인할 수 있습니다.
+
+<img width="1200" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/9dae0289-8855-472d-89bc-08e306ef24b4">
+
+그런데 생각해보면 엘라스틱서치에 저장할 인덱스만 지정했을 뿐, 엘라스틱서치의 주소를 적지 않았습니다.
+그럼에도 정상 동작하는 이유는 `hosts`는 기본적으로 `localhost:9200`으로 설정되어 있기 때문입니다.
+
+### 6.3.4. 코덱
+
+코덱(codec)은 입력/출력/필터와 달리 **독립적으로 동작하지 않고 입력과 출력 과정에서 사용되는 플러그인**으로,
+입/출력 시 메시지를 적절한 형태로 변환하는 **스트림 필터**입니다.
+
+자주 사용하는 플러그인은 다음과 같으며, 입력/출력 단계에서 데이터의 인코딩/디코딩을 담당합니다.
+
+| 플러그인      | 설명                           |
+|:----------|:-----------------------------|
+| json      | 입력 시 JSON 형태의 메시지를 객체로 읽어 들임 |
+| plain     | 메시지를 단순 문자열로 읽어 들임. 코덱 기본 설정 |
+| rubydebug | 디버깅을 위한 목적으로 주로 사용. 입력에 사용 X |
+
+`test-logstash.conf`에 json 플러그인을 추가해봅시다. 다음과 같이 수정해주세요.
+
+```yaml
+input {
+  file {
+    path => "/Users/subin/WorkSpace/TIL/logstash-7.10.2/config/test-input.log"
+    start_position => "beginning"
+    sincedb_path => "/dev/null"
+    codec => "json"
+  }
+}
+
+output {
+  stdout {}
+}
+```
+
+파이프라인을 실행해보면 다음과 같이 오류가 발생합니다.
+
+<img width="647" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/098d2bb7-eeb9-49fd-b233-42c3791ea472">
+
+`_jsonparsefailure`는 JSON 문법이 잘못되었다는 뜻이지만, 결국 **파일을 인코딩하지 못한 문제**입니다.
+입력 파일은 플레인 텍스트 형식인데 JSON 형식으로 인코딩을 시도했기 때문입니다.
+
+`codec => "plain"`으로 변경하거나 codec 플러그인 설정을 지우면 정상 동작합니다. 관련 예제 및 결과 화면은 생략하겠습니다.
+그 외에 입력 코덱은 multiline 코덱도 많이 사용하는 데, 해당 내용은 뒤에서 추후 살펴보도록 하겠습니다.
+
+이번에는 출력 코덱을 확인해봅시다.
+
+```yaml
+input {
+  file {
+    path => "/Users/subin/WorkSpace/TIL/logstash-7.10.2/config/test-input.log"
+    start_position => "beginning"
+    sincedb_path => "/dev/null"
+  }
+}
+
+output {
+  stdout {
+    #codec => "line"
+    #codec => "json"
+    #codec => "rubydebug"
+  }
+}
+```
+
+한 번에 하나의 주석(#)만 풀면서 파이프라인을 세 번 실행하여 결과를 살펴보도록 하겠습니다.
+
+먼저 line 코덱을 실행해봅시다. 아래 그림에서 볼 수 있듯이 라인 형식으로 텍스트를 출력합니다.
+
+<img width="806" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/fed2e236-c288-47fa-b516-e212b18c1cd8">
+
+그 다음 json 코덱을 실행해보면, 다음과 같이 JSON 형태로 로그가 만들어진 것을 볼 수 있습니다.
+json 내용을 보면 우리가 만들지 않은 `@timestamp`, `@version` 같은 여러 필드가 추가된 것을 확인할 수있습니다.
+
+<img width="1111" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/348f0616-e9e0-4b93-93f9-04e5213eacbc">
+
+마지막으로 rubydebug 코덱입니다. 실행해보면 그 동안 우리가 보던 결과인 것으로 보아, 표준 출력 플러그인에 코덱을 명시하지 않으면 rubydebug가 기본으로 사용되는 것을 알 수 있습니다.
+
+<img width="648" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/013fe246-f811-4347-84c7-ee7cd77dadc1">
+
+## 6.4. 다중 파이프라인
+
+다중 파이프라인은 **하나의 로그스태시에서 여러 개의 파이프라인을 동작하는 것**입니다.
+A 서버와 B 서버에서 하나의 로그스태시로 전달하거나 하나의 서버에서 A 프로그램 로그와 B 프로그램 로그를 저장하는 경우 사용합니다.
+
+<img width="826" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/628e5b3c-ee9e-44a7-8183-e591e80b15e4">
+
+### 6.4.1. 다중 파이프라인 작성
+
+먼저 `pipelines.yml` 파일을 다음과 같은 내용을 추가합니다.
+
+```yaml
+- pipeline.id: mypipe1
+  path.config: //Users/subin/WorkSpace/TIL/logstash-7.10.2/config/mypipe1.conf
+- pipeline.id: mypipe2
+  path.config: /Users/subin/WorkSpace/TIL/logstash-7.10.2/config/mypipe2.conf
+```
+
+`pipeline.id`와 `path.config`를 포함하여 많이 쓰이는 파이프라인 설정은 아래와 같습니다.
+
+| 설정                  | 설명                                                                                          |
+|:--------------------|:--------------------------------------------------------------------------------------------|
+| pipeline.id         | 파이프라인의 고유한 아이디                                                                              |
+| path.config         | 파이프라인 설정 파일 위치                                                                              |
+| pipeline.workers    | 필터와 출력을 병렬로 처리하기 위한 워커 수. 기본적으로 호스트의 CPU 코어 수와 동일하게 설정됨                                     |
+| pipeline.batch.size | 입력 시 하나의 워커당 최대 몇 개까지 인베트를 동시에 처리할지 결정. 수치가 클수록 요청 수행 횟수는 줄어들지만 단일 요청이 커지므로 적당히 조절해가며 튜닝 필요 |
+| queue.type          | 파이프라인에서 사용할 큐의 종류를 정할 수 있음. 기본적으로 memory 타입이 사용되나, persisted 타입 선택 시 이벤트 유실을 좀 더 최소화할 수 있음  |
+
+다중 파이프라인 사용법을 익히는 것이 목적이기 때문에 `mypip1.conf`와 `mypipe2.conf`는 최대한 간단하게 작성하겠습니다.
+`mypipe1.conf`는 다음과 같이 작성합니다.
+
+```yaml
+input {
+  file {
+    path => "/Users/subin/WorkSpace/TIL/logstash-7.10.2/config/test-input.log"
+    start_position => "beginning"
+    sincedb_path => "/dev/null"
+  }
+}
+
+output {
+  stdout {
+  }
+}
+```
+
+그리고 `mypipe2.conf`는 아래와 같이 작성합니다.
+
+```yaml
+input {
+  file {
+    path => "/Users/subin/WorkSpace/TIL/logstash-7.10.2/config/test-input.log"
+    start_position => "beginning"
+    sincedb_path => "/dev/null"
+  }
+}
+
+output {
+  elasticsearch {
+    index => "multipipe2"
+  }
+}
+```
+
+그 다음 지금까지와 다르게 `-f` 옵션을 사용하지 않고 실행합니다.
+
+```bash
+./bin/logstash         
+```
+
+그러면 화면에 다음과 같이 `mypipe1.conf` 실행 결과가 나옵니다.
+
+<img width="655" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/8e679b57-867d-4624-ac04-d980675e5781">
+
+mypipe2는 kibana 대시보드에서 확인해보았습니다.
+
+<img width="1194" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/fb0601e5-47ac-4f9b-baf5-4a1f4bf6b1ea">
+
+## 6.5. 모니터링
+
+로그스태시를 모니터링을 하는 방법은 크게 두 가지입니다
+
+1. 로그스태시가 제공하는 API를 활용해 특정 시점의 통계 정보를 얻는 방법
+2. 모니터링 기능을 활성화해서 지속적인 통계 정보를 수집하고, 키바나를 통해 대시보드 형태로 연속적인 모니터링을 수행하는 방법
+
+### 6.5.1. API를 활용하는 방법
+
+로그스태시에서 제공하는 API를 활용하면 **설정 변경이나 시스템 재시작 없이 설정 파일을 확인**할 수 있고,
+**전반적인 통계 정보를 제공**하기 때문에 간단한 정보를 빠르게 확인하기 좋습니다.
+
+로그스태시를 실행 중인 상태로, 다른 터미널에서 아래 API를 호출해봅시다.
+
+```bash
+curl -X GET "localhost:9600?pretty"
+```
+
+정상적으로 실행 중이라면 다음과 같이 로그스태시 정보가 표출됩니다.
+
+<img width="614" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/c6776fe1-315c-49fb-9a19-c1d7d169e861">
+
+로그스태시에서 제공하는 API는 다음과 같이 네 가지입니다.
+
+| 정보    | 사용법                                                   | 설명                                           |
+|:------|:------------------------------------------------------|:---------------------------------------------|
+| 노드    | curl -X GET "localhost:9600/_node?pretty"             | 로그스태시가 실행되고 있는 노드의 기본 정보 제공 (파이프라인, OS, JVM) |
+| 플러그인  | curl -X GET "localhost:9600/_node/plugins?pretty"     | 로그스태시에서 사용하는 플러그인 정보 제공                      |
+| 노드 통계 | curl -X GET "localhost:9600/_node/stats?pretty"       | 파이프라인, 이벤트, 프로세스 등 로그스태시 통계 정보 제공            |
+| 핫 스레드 | curl -X GET "localhost:9600/_node/hot_threads?pretty" | CPU 사용량이 많은 스레드를 높은 순으로 보여줌                  |
+
+노드 API를 직접 사용해보도록 하겠습니다. 노드 API는 다음과 같은 타입을 가집니다.
+
+| 타입        | 설명                                                  |
+|:----------|:----------------------------------------------------|
+| pipelines | 실행 중인 파이프라인의 종류와 각 파이프라인에 할당된 배치 크기, 워커 수 등 정보 제공   |
+| os        | 로그스태시가 실행되는 노드의 OS 종류와 버전 등의 정보 제공                  |
+| jvm       | 로그스태시가 실행되는 노드의 자바 가상 머신의 버전과 GC 방식, 힙 메도리 등의 정보 제공 |
+
+이 중 pipelines 옵션을 실행해보겠습니다.
+
+```bash
+curl -X GET "localhost:9600/_node/pipelines?pretty"  
+```
+
+그러면 다음과 같이 파이프라인 정보가 표출되는 것을 확인할 수 있습니다.
+
+<img width="581" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/3c75eeb0-da70-4cc1-8241-a014156c645b">
+
+이번에는 노드 통계 정보 API를 사용해보겠습니다. 노드 통계 정보 API는 다음과 같은 타입을 가집니다.
+
+| 타입        | 설명                                                                   |
+|:----------|:---------------------------------------------------------------------|
+| jvm       | 스레드, 메모리 사용량, GC 등 자바 가상 머신의 사용 통계                                   |
+| process   | 사용 중인 파일 디스크립터 수, 즉 열어둔 파일 수와 메모리, CPU 사용량 등 프로세스의 사용 통계             |
+| events    | 파이프라인별이 아닌, 실행 중인 로그스태시에 인입/필터링/출력된 총 이벤트 수와 이를 처리하기 위해 소요된 시간 등의 통계 |
+| pipelines | 파이프라인과 그 하위에 구성된 플러그인별 이벤트 통계                                        |
+| reloads   | 로그스태시에서 자동/수동으로 설정을 리로드했을 때 성공/실패 수 통계                               |
+| os        | 로그스태시가 도커와 같은 컨테이너에서 실행될 때 cgroup에 대한 통계                             |
+
+이 중 pipelines 옵션을 실행해봅시다.
+
+```bash
+curl -X GET "localhost:9600/_node/stats/pipelines?pretty"  
+```
+
+그러면 아래와 같이 파이프라인에 대한 통계 정보가 표출되는 것을 확인할 수 있습니다.
+
+<img width="619" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/2afec384-b68c-4d81-8477-25003db04371">
+
+### 6.5.2. 모니터링 기능 활성화
+
+xpack에서 제공하는 모니터링 기능을 활성화하면 **로그스태시 통계 데이터를 엘라스틱서치에 전송하고, 키바나 GUI를 이용해 모니터링 정보를 연속적으로 파악**할 수 있습니다.
+xpack을 사용해야 하기 때문에 Apache 2.0 License만 사용하는 OSS 버전은 x-pack 미지원으로 해당 방법을 활용하기 어렵습니다.
+
+`logstash.yml` 파일을 열고 다음과 같이 수정합니다.
+
+<img width="619" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/73bbcba4-f340-4824-bf24-f379dd110cb7">
+
+그 다음 로그스태시를 재실행합니다.
+
+```bash
+./bin/logstash  
+```
+
+그 다음 Kibana 대시보드에 접속하여 `Management > Stack Monitoring`을 선택합니다.
+
+<img width="1272" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/edfae65a-5a08-4f17-a0e1-a46b2e76244a">
+
+한 번도 사용한 적이 없다면 UI 실행이 필요합니다. 하단의 `Or, set up with self monitoring`을 클릭합니다.
+
+<img width="554" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/b15bb319-cb33-4411-876c-a04c4fbcea3b">
+
+그 다음은 `Turn on monitoring`을 클릭하면 모니터링 UI가 활성화됩니다.
+
+<img width="552" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/8bbf0a99-df74-4c8a-92a1-33cfc56d2568">
+
+그러면 아래와 같은 화면을 볼 수 있습니다.
+
+<img width="931" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/e0bd3c77-c424-48cd-ba3d-73d8b1cc8c7e">
+
+- 오버뷰 (Overview) : 로그스태시의 전체적인 통계 화면을 보여줌
+- 노드 (Nodes) : 로그스태시 인스턴스 통계 지표 표시
+- 파이프라인 (Pipelines) : 현재 실행 중인 로그스태시들의 파이프라인 구성과 성능 정보 표시
+
+각각 접속하면 위에서 설명한 다양한 정보들을 볼 수 있습니다. 여기서는 각 화면에 대한 설명은 생략하겠습니다.
 
 > 본 게시글은 [엘라스틱 스택 개발부터 운영까지](https://product.kyobobook.co.kr/detail/S000001932755) 도서를 참고하여 작성되었습니다.
 >
