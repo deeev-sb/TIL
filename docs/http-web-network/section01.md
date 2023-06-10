@@ -46,7 +46,7 @@ IP 패킷은 아래와 같이 전송 데이터와 이를 감싸는 출발지 IP,
 
 IP에서 발생하는 수많은 문제를 TCP가 해결해줍니다.
 
-### 인터넷 프로토콜 4계층
+### 1.3.1. 인터넷 프로토콜 4계층
 TCP에 대해 알아보기 전에 **인터넷 프로토콜 4계층**에 대한 개념을 간략하게 집고 넘어가도록 하겠습니다.
 
 <img width="217" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/6bef1881-591e-4bc7-90cc-6754617546f5">
@@ -64,7 +64,7 @@ TCP에 대해 알아보기 전에 **인터넷 프로토콜 4계층**에 대한 �
 4. TCP 정보를 포함한 IP 패킷이 생성됩니다.
 5. LAN을 통과하면 인터넷을 통해 목적 서버로 전송됩니다.
 
-### TCP/IP 패킷 정보
+### 1.3.2. TCP/IP 패킷 정보
 
 TCP/IP 패킷은 아래와 같은 정보를 가지고 있습니다.
 
@@ -74,11 +74,97 @@ TCP/IP 패킷은 아래와 같은 정보를 가지고 있습니다.
 **TCP 세그먼트**는 출발지/목적지에 대한 Port를 가지고 있어 어떠한 프로그램이 출발지/목적지인지 알 수 있습니다.
 그 외에 전송 제어, 순서, 검증 정보 등에 대한 정보를 가지고 있습니다.
 
-### TCP 특징
-- Transmission Control Protocol : 전송 제어 프로토콜
+### 1.3.3.TCP 특징
+
+TCP (Transmission Control Protocol)는 전송 제어 프로토콜로, 다음과 같은 특징을 가집니다.
+
 - 연결 지향적 : TCP 3 way handshake (가상 연결)
 - 데이터 전달 보증
 - 순서 보장
 - 신뢰할 수 있는 프로토콜
 - 현재는 대부분 TCP 사용
 
+좀 더 상세히 살펴보겠습니다.
+
+#### 1.3.3.1. TCP 3 way handshake
+
+3 way handshake 는 다음과 같은 과정을 거치며,  데이터를 주고 받을 양쪽 모두 준비가 되었다는 것을 보장합니다.
+
+<img width="428" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/66363e2a-7668-45ee-9a32-c53323bf3840">
+
+1. 클라이언트에서 서버로 SYN을 보내 접속을 요청합니다.
+2. 서버는 접속 요청을 수락한다는 ACK와 SYN Flag를 클라이언트로 보냅니다.
+3. 클라이언트에서 서버로 응답을 받았다는 의미에서 ACK를 보냅니다.
+4. 클라이언트와 서버가 연결되어 데이터를 주고 받을 수 있게 됩니다.
+
+TCP 연결이 되었다고 하는 것이 실제로 연결된 것이 아니라 **개념적으로 연결**되어 있는 것입니다.
+
+#### 1.3.3.2. 데이터 전달 보증
+
+<img width="425" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/513bf8b2-707f-4b0c-9fae-c46b2c2eb333">
+
+클라이언트에서 서버로 데이터를 전송하면, 서버는 데이터를 잘 받았다는 사실을 클라이언트에게 알려줍니다. 이러한 점에서 데이터 전달이 보증된다고 표현합니다.
+
+#### 1.3.3.3. 순서 보장
+
+다음 그림과 같이 클라이언트에서 보낸 패킷 순서와 서버가 다르게 보내면, 클라이언트에 다시 보내달라고 요청하는 등으로 순서를 보장합니다.
+
+<img width="453" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/0d63fa33-26c4-4236-83df-9d9495933f21">
+
+물론, 실제로는 이것보다 더 효율적으로 구성되어 있으나 여기서는 간단하게 설명하기 위해 재요청 하는 방식으로 설명드렸습니다.
+
+### 1.3.4. UDP 특징
+
+UDP (User Datagram Protocol)은 사용자 데이터그램 프로토콜로, 기능이 거의 없어 하얀 도화지에 비유하며 다음과 같은 특징을 가집니다.
+
+- 연결 지향 X (TCP 3 way handshake X)
+- 데이터 전달 보증 X
+- 순서 보장 X
+- 데이터 전달 및 순서가 보장되지 않지만, 단순하고 빠름
+- IP와 거의 비슷하나, Port와 체크섬 정도만 추가됨
+- 애플리케이션에서 추가 작업이 필요함
+
+참고로, HTTP3에서 UDP 기반의 `QUIC`라는 기술을 사용하고 있습니다.
+QUIC는 TLS 1.3 기반으로 암호화된 세션과 함께 패킷을 보내면서 0-RTT 만에 신뢰성을 확보합니다.
+또한, 혼잡 제어 및 재전송 기능을 제공하며 신뢰성을 확보합니다.
+
+![image](https://github.com/Kim-SuBin/TIL/assets/46712693/1e89f9f8-a1d4-4fde-b2b3-457f40596657)
+
+## 1.4. Port
+
+Port는 **동일한 IP 내에 프로세스를 구분하는 것**입니다.
+
+<img width="424" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/160532dc-8f67-4d63-a255-2ab7c4fe9120">
+
+예를 들어, 하나의 기숙사가 IP라고 하고 기숙사 내에 있는 각 호실을 Port라고 생각하면 됩니다.
+
+Port는 보통 `0 ~ 65535`까지 할당이 가능한데, `0 ~ 1023`은  잘 알려진 포트로 사용하지 않는 것이 좋습니다.
+잘 알려져 있는 Port 몇 가지에 대해 정리해보았습니다.
+
+- FTP : 20, 21
+- TELNET : 23
+- HTTP : 80
+- HTTPS: 443
+
+## 1.5. DNS
+
+IP는 기억하기 어렵고, 변경될 수 있다는 단점을 가집니다.
+
+<img width="364" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/5c22206a-071a-4331-a558-6c0d128806b3">
+
+이러한 단점을 보완하기 위해 DNS (Domain Name System, 도메인 네임 시스템)을 사용합니다.
+DNS는 **도메인 명을 IP 주소로 변환**합니다. 그렇기에 클라이언트는 도메인 명만 알고 있으면 됩니다.
+
+<img width="362" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/f492f4ed-3bac-4bc7-84b3-1747f8e5cb00">
+
+> 본 게시글은 [모든 개발자를 위한 HTTP 웹 기본 지식](https://www.inflearn.com/course/http-%EC%9B%B9-%EB%84%A4%ED%8A%B8%EC%9B%8C%ED%81%AC/dashboard) 강의를 참고하여 작성되었습니다.
+>
+>
+> 상세한 내용이 궁금하시다면 강의 수강을 추천해 드립니다.
+>
+
+추가로 참고한 내용
+- <https://romromlog.tistory.com/entry/%EB%AA%A8%EB%93%A0-%EA%B0%9C%EB%B0%9C%EC%9E%90%EB%A5%BC-%EC%9C%84%ED%95%9C-HTTP-%EC%9B%B9-%EA%B8%B0%EB%B3%B8-%EC%A7%80%EC%8B%9D-1-%EC%9D%B8%ED%84%B0%EB%84%B7-%EB%84%A4%ED%8A%B8%EC%9B%8C%ED%81%AC>
+- <https://bangu4.tistory.com/74>
+- <https://mindnet.tistory.com/entry/%EB%84%A4%ED%8A%B8%EC%9B%8C%ED%81%AC-%EC%89%BD%EA%B2%8C-%EC%9D%B4%ED%95%B4%ED%95%98%EA%B8%B0-22%ED%8E%B8-TCP-3-WayHandshake-4-WayHandshake>
+- <https://www.inflearn.com/questions/744327/http3-udp%ED%86%B5%EC%8B%A0>
