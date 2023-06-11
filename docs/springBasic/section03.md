@@ -536,7 +536,7 @@ public class OrderApp {
 - 스프링 빈은 **applicationContext.getBean()** 메서드를 사용해 찾을 수 있다.
 - 스프링 컨테이너에서 객체를 스프링 빈으로 등록하고, 스프링 컨테이너에서 스프링 빈을 찾아 사용하도록 변경되었다!
 
-> 본 게시글은 [스프링 핵심 원리 - 기본편](https://www.inflearn.com/course/the-java-java8) 강의를 참고하여 작성되었습니다.
+> 본 게시글은 [스프링 핵심 원리 - 기본편](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%95%B5%EC%8B%AC-%EC%9B%90%EB%A6%AC-%EA%B8%B0%EB%B3%B8%ED%8E%B8) 강의를 참고하여 작성되었습니다.
 >
 >
 > 상세한 내용이 궁금하시다면 강의 수강을 추천해 드립니다.
