@@ -469,7 +469,7 @@ filter {
   date {
     match => ["timestamp", "YYYY-MM-dd HH:mm", "yyyy/MM/dd HH:mm:ss"]
     target => "new_timestamp"
-    timezone => "KST"
+    timezone => "Asia/Seoul"
   }
 }
 ```
@@ -477,7 +477,7 @@ filter {
 `timestamp` 필드 중에서 `YYYY-MM-dd HH:mm` 포맷이거나 `yyyy/MM/dd HH:mm:ss` 포맷인 경우에 `date` 플러그인을 통해 매칭할 수있습니다.
 `target`은 매핑된 필드가 저장될 새로운 필드를 의미하며, 여기서는 `new_timestamp` 필드를 생성합니다.
 만약, `new_timestamp` 대신 `timestamp`를 사용하면 기존 필드의 내용을 덮어쓰게 됩니다.
-`KST`는 타임존을 지정한 것으로, 지정하지 않으면 로컬 PC(서버)의 타임존을 적용하게 됩니다.
+`Asia/Seoul`는 타임존을 지정한 것으로, 지정하지 않으면 로컬 PC(서버)의 타임존을 적용하게 됩니다.
 
 <img width="673" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/fb4de552-dabd-424e-9ae4-05270432d0f3">
 
