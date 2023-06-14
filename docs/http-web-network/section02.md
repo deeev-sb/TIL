@@ -66,7 +66,7 @@ URL의 전체 문법은 다음과 같이 구성되어 있습니다.
    - DNS 서버 조회 : www.google.com → 200.200.200.2
    - scheme 조회 : https → 443
 3. 웹 브라우저에서 HTTP 요청 메시지를 생성
-   <img width="336" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/e92f81c0-6523-492f-928f-54bd524e4511">
+   <br/><img width="336" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/e92f81c0-6523-492f-928f-54bd524e4511">
    - HTTP 메서드, HTTP 버전 등의 정보가 포함되어 있음
    - 더 많은 정보가 포함되어 있는데, 여기서는 간략하게 표현함
 4. SOCKET 라이브러리를 통해 서버로 HTTP 메시지 전달
@@ -75,7 +75,7 @@ URL의 전체 문법은 다음과 같이 구성되어 있습니다.
 6. 인터넷 망의 수많은 노드를 통해 200.200.200.2로 전달
 7. 서버에서 패킷을 열어 HTTP 요청 메시지 확인 및 해석
 8. 서버에서 HTTP 응답 메시지 생성
-   <img width="357" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/a5825ff4-2f08-4209-aaa5-734d928c41cc">
+   <br/><img width="357" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/a5825ff4-2f08-4209-aaa5-734d928c41cc">
     - HTTP 응답 메시지 관련 내용은 추후 설명 예정이며, 여기서는 생략
 9. 서버에서 HTTP 응답 메시지를 TCP/IP 패킷으로 감싸 웹 브라우저로 전달
 10. 웹 브라우저에서 HTML 렌더링을 통해 HTML 결과 표출
