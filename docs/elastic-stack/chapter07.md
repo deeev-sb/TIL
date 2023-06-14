@@ -180,13 +180,32 @@ output.elasticsearch:
 
 멀티라인에는 다음과 같이 세 가지 하위 옵션이 있습니다.
 
-- `multiline.patter` : 정규식을 이용해 패턴 지정
+- `multiline.pattern` : 정규식을 이용해 패턴 지정
 - `multiline.negate` : true일 때 패턴 일치 조건을 반전시킴
 - `multiline.match` : 멀티라인을 처리하는 방식으로, before와 after를 지정할 수 있음
 
 `negate`와 `match`를 조합해서 사용하면 다음 그림과 같이 네 가지 경우가 생깁니다.
 
 <img width="555" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/482aff30-8f06-4594-a783-bca0ee0d0898">
+
+1번 경우를 기반으로 코드를 작성하면 다음과 같습니다.
+
+```yaml
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - {log 파일 위치}
+    multiline.pattern: '^b'
+    multiline.negate: false
+    multiline.match: after
+    
+setup.kibana:
+  host: "localhost:5601"
+
+output.elasticsearch:
+  hosts: ["localhost:9200"]
+```
 
 ### 7.2.4. 모듈
 
