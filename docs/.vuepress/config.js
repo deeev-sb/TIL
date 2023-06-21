@@ -28,6 +28,7 @@ module.exports = {
             sidebar.getSidebarGroup('springBasic', '[강의] 스프링 핵심 원리 - 기본편'),
             sidebar.getSidebarGroup('http-web-network', '[강의] 모든 개발자를 위한 HTTP 웹 기본 지식'),
             sidebar.getSidebarGroup('springInAction', '[책] 스프링 인 액션'),
+            sidebar.getSidebarGroup('java-posting', 'Java'),
             sidebar.getSidebarGroup('java8', '[강의] 더 자바, Java 8'),
             sidebar.getSidebarGroup('elastic-stack-posting', 'Elastic Stack'),
             sidebar.getSidebarGroup('analyze-data-with-elk-stack', '[강의] ELK 스택으로 데이터 분석 (7.10.2 ver)'),
