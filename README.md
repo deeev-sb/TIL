@@ -10,6 +10,8 @@
 
 ⬜️ [[책] 스프링 인 액션](docs/springInAction)
 
+⬜️ [[강의] 모든 개발자를 위한 HTTP 웹 기본 지식](docs/http-web-network)
+
 ## ELK
 
 ✅ [[강의] ELK 스택으로 데이터 분석 - 7.10.2 ver](docs/analyze-data-with-elk-stack)
