@@ -153,7 +153,256 @@ PUT kibana_index2/_doc/1
 - 버킷 집계 : 특정 기준에 맞춰 데이터 분리. 서브 버킷 생성 가능
 - 파이프라인 집계 : 집계 결과를 입력으로 받아 다시 집계를 함. 부모/형제 집계 유형이 있음
 
+시각화 타입을 생성하기 위해서는 메뉴의 `Kibana > Visualize`에 접속합니다.
 
+<img width="1135" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/9db7912b-a4b5-4ebf-97bb-b90d44ae5916">
+
+그 다음 `Create visualization`을 눌러 줍니다.
+
+<img width="1124" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/2e432748-a77c-41a8-8ece-ef43285a83eb">
+
+그러면 다음과 같은 팝업이 뜹니다. 여기서 원하는 타입을 선택해서 시각화하면 됩니다.
+
+<img width="741" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/2f25e1b4-b459-44c7-867b-81f2c96a216a">
+
+### 8.3.1. 막대 그래프
+
+막대그래프는 막대 형태로 **2차원 데이터를 표현**하며, `Vertical Bar`와 `Horizontal Bar`라는 두 가지 타입이 있습니다.
+
+먼저, `Vertical Bar`를 살펴보겠습니다. `Visualization`에서 `Vertical Bar`를 선택한 다음, `kibana_sample_data_flights`를 인덱스 패턴으로 고르면 다음과 같은 그래프를 볼 수 있습니다.
+
+<img width="1140" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/ec51fa37-e863-4672-b034-a960321f35a5">
+
+`Metrics`는 평균값/최솟값/최댓값 같은 통계를 보여주고, 그래프의 **Y축**에 속합니다.
+
+`Buckets`는 다음과 같은 세 가지 메뉴가 존재합니다.
+
+- `X-axis` : X축을 의미
+- `split series` : 서브 버킷 용도로 사용
+- `split chart` : 그래프를 버킷 기준으로 쪼개서 보여줄 때
+
+`X-axis`를 선택하면 `Aggregation`을 선택해야 합니다.
+
+<img width="373" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/c4aff016-7879-4bf8-be10-0a6eee95ab5e">
+
+선택할 수 있는 `Aggregation` 종류는 다음과 같습니다.
+
+| 버킷 집계             | 설명                                                  |
+|:------------------|:----------------------------------------------------|
+| Date Histogram    | 날짜/시간 데이터 타입을 가진 필드만 사용 가능. 일정한 주기를 기준으로 버킷을 구분함    |
+| Date Range        | 날짜/시간 데이터 타입을 가진 필드만 사용 가능. 사용자가 임의 범위를 지정해 버킷을 구분함 |
+| Filters           | 필터 적용 가능                                            |
+| Histogram         | 일정한 주기를 기준으로 버킷을 구분함                                |
+| Ipv4 Range        | IP 타입을 가진 필드만 사용 가능. IP 범위를 임의 지정해 버킷을 구분함          |
+| Range             | 사용자가 임의의 범위를 지정해 버킷을 구분함                            |
+| Significant Terms | 필드의 유니크한 값 중 통계적으로 의미 있는 용어를 기준으로 구분함               |
+| Term              | 필드의 유니크한 값을 기준으로 구분함                                |
+
+#### 8.3.1.1. Buckets - Date Histogram
+
+이 중에서 먼저 `Date Histogram`을 선택한 다음, `Field`는 `timestamp`로 설정하고 `Minimum interval`은 `Minute`로 설정한 다음 하단의 `Update` 버튼을 눌러봅시다.
+그러면 다음과 같은 `Date Histogram`을 볼 수 있습니다.
+
+<img width="1136" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/665a1d6f-b434-4e59-ae8a-baa09e95086b">
+
+#### 8.3.1.2. Buckets - Range
+
+그 다음 `Range`를 사용해보겠습니다. `Range`를 사용하려면 사용자가 데이터 값의 범위를 대략으로 알고 있어야 합니다. 그래야 임의로 간격을 지정할 수 있기 때문입니다.
+
+먼저, 키바나 콘솔에서 데이터 범위를 확인해봅시다.
+
+```bash
+GET kibana_sample_data_flights/_search
+{
+  "size": 0,
+  "aggs": {
+    "unique_aggs": {
+      "terms": {
+        "field": "dayOfWeek"
+      }
+    }
+  }
+}
+```
+
+엘라스틱서치 search API를 사용해 확인해보면 다음과 같이 `dayOfWeek` 필드가 0부터 6까지의 값을 가진다는 것을 알 수 있습니다.
+
+```json
+{
+  // ...
+  "aggregations" : {
+    "unique_aggs" : {
+      "doc_count_error_upper_bound" : 0,
+      "sum_other_doc_count" : 0,
+      "buckets" : [
+        {"key" : 0, "doc_count" : 2033},
+        {"key" : 4, "doc_count" : 2001},
+        {"key" : 2, "doc_count" : 1948},
+        {"key" : 1, "doc_count" : 1934},
+        {"key" : 5, "doc_count" : 1915},
+        {"key" : 3, "doc_count" : 1914},
+        {"key" : 6, "doc_count" : 1314}
+      ]
+    }
+  }
+}
+```
+
+이제 `Range`를 생성해봅시다. `Field`는 `dayOfWeek`를 선택하고, 0~1, 1~4, 4~7의 세 구간으로 나눈다음 `Update`를 클릭합니다. 그러면 다음과 같이 Range 별로 구분된 Vertical Bar를 확인할 수 있습니다.
+
+<img width="1143" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/7ba15877-eb12-4db0-86ba-4a4b102b0641">
+
+#### 8.3.1.3. Buckets - Term
+
+`Term`은 특정 필드의 고윳값을 기준으로 데이터를 구분합니다. `Aggregation`은 `Terms`로 선택하고 `Field`는 `dayOfWeek`를 선택합니다.
+
+<img width="1142" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/322577a1-e337-4d0e-bb6d-dd090558d754">
+
+`Order by`라고 하여 X축 정렬이며, 다음과 같이 세 가지입니다.
+
+- `Metric` : Count가 높은 버킷 순으로 정렬
+- `Alphabetical` : 알파벳순으로 정렬
+- `Custom metric` : 사용자가 정의한 정렬에 사용하기 위한 집계. 정렬을 위한 집계를 생성해야 함.
+
+여기서는 `Custom metric`을 선택했으며, `DistanceMiles` 필드의 평균값이 높은 순으로 X축 정렬하도록 설정했습니다.
+
+그리고 마지막의 `Order`는 정렬을 오름차순으로 할지 내림차순으로 할지 설정하며, `Size`는 그래프로 보여줄 X축의 상위 개수를 선택합니다.
+
+#### 8.3.1.4. Metrics
+
+`Metrics`에 대해 알아보기 전 `Buckets`를 다음과 같이 설정합니다.
+
+<img width="250" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/d33d1f1d-fa80-4552-ba27-c76dca8b1e02">
+
+이제 `Metrics`를 설정해보겠습니다. `Metrics`에서 `+ Add`를 클릭하면 다음과 같은 두 가지 메뉴를 볼 수 있습니다.
+
+- `Y-axis` : Y축이 되는 메트릭 메뉴.
+- `dot size` : 라인을 동그라미 원 형태로 만들어줌
+
+`Y-axis`는 특별한 설정을 하지 않으면 `Aggregation`을 `Count`로 지정합니다.
+`Aggregation`을 다음과 같이 `Average`로 선택하고, `Field`는 `AvgTicketPrice`를 선택한 다음 `Update`하면 다음과 같음 화면을 볼 수 있습니다.
+
+<img width="1144" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/2eb699e5-45e4-4477-bf92-a35f795e3629">
+
+마지막으로 **파이프라인 집계**를 사용해보겠습니다. 기존의 `Metics`를 유지하고 `+Add`를 누르고 `Y-axis`를 선택합니다.
+그 다음 `Aggregation`은 부모 파이프라인 집계 중 `Derivative`(미분)을 선택합니다.
+그리고 `Metric`을 이전에 생성한 `Metric: Average AvgTicketPrice`로 선택합니다.
+
+<img width="1143" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/c7f29023-e898-4192-bd40-202045c91442">
+
+이렇게 하면, 이전에 만들었던 Metric을 이용해 미분 집계가 됩니다.
+
+### 8.3.2. 히트맵
+
+히트맵은 **열분포 형태의 시각화 표현 방식**입니다. X, Y축을 2개의 버킷으로 생성하고 메트릭값을 색의 진하기로 표현함으로써 3차원 데이터 처리가 가능합니다.
+`Visualization`을 `HeatMap`으로 선택하고, 인덱스 패턴은 이전과 동일하게 `kibana_sample_data_flights`를 선택합니다.
+그러면 화면을 볼 수 있습니다.
+
+<img width="1144" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/f83a8ac5-9603-4048-9247-016de8e7a067">
+
+히스토그램으로 구현하기 위해 다음과 같이 설정해주세요.
+
+- Buckets : X-axis
+  - Aggregation : Histogram
+  - Field : dayOfWeek
+  - Interval : 1
+- Metrics : Y-axis
+  - Sub aggregation : Terms
+  - Field : DestCityName
+  - Order by : Alphabetical
+  - Order : Descending
+  - Size : 5
+
+그러면 다음과 같이 히스토그램이 깨진 모양으로 생성되는 것을 확인할 수 있습니다.
+
+<img width="1143" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/be3daf8d-0bd9-47f8-a77c-d47b5ab9ccdf">
+
+X, Y축이 고정되지 않으면 이렇게 데이터에 따라 축이 계속 변경됩니다.
+Y축이 고정될 수 있도록 설정을 X축과 Y축을 바꿔줍시다.
+
+<img width="1143" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/408e81ff-080c-4832-a84f-be3692c3730d">
+
+### 8.3.3. TSVB (Time Series Visual Builder)
+
+TSVB는 **시계열 데이터를 처리하기 위한 메뉴**로, 로그 모니터링이나 시간 범위 내의 특정 동작을 시각화하는 데 유용합니다.
+TSVB를 통해 시계열 데이터, 통계 정보, n번째 상위 값, 게이지 등을 확인할 수 있습니다.
+
+TSVB를 선택하면 다음과 같은 화면을 볼 수 있습니다.
+
+<img width="1132" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/abe0e7a1-f785-47f3-ad62-1a343c872a17">
+
+상단의 메뉴는 다음과 같습니다.
+
+- `Time Series` : 시계열 데이터를 히스토그램 형태로 표현
+- `Metric` : 텍스트 형태로 표현
+- `Top N` : 수평 바 형태로 표현
+- `Gauge` : 게이지 형태로 표현
+- `Markdown` : 마크다운 형태로 표현
+- `Table` : 테이블 형태로 표현
+
+#### 8.3.3.1. Panel options
+
+TSVB에서 데이터를 표시하기 위해 먼저 인덱스 패턴을 지정해봅시다. 인덱스 패턴은 `kibana_sample_data_flights`를 입력하고, `Time filed`는 `timestamp`를 입력합니다.
+
+<img width="1132" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/32843f46-5814-45ca-991d-58ba7764a663">
+
+`Interval`은 `Time filed`를 구분할 시간 주기이며, 여기서는 기본 설정 그대로 `auto`로 두었습니다. 그리고 `Panel filter`는 필터를 설정하는 것으로, 쿼리바와 사용법이 동일합니다.
+`Cancelled : false` 같은 형식으로 작성하면 데이터 중 Cancelled가 false인 데이터만 필터링해서 보여줍니다.
+
+#### 8.3.3.2. Data
+
+Data는 **매트릭 집계나 파이프라인 집계를 추가**할 수 있습니다.
+`AvgTicketPrice` 필드의 min, max를 볼 수 있도록 설정하고, 색이 표시되는 네모 칸을 눌러 색상을 선택합니다.
+그러면 다음과 같이 두 개의 그래프가 함께 표출되는 것을 확인할 수 있습니다.
+
+<img width="1133" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/eb63ef74-98a8-4ee0-aefa-05b0627dca5f">
+
+#### 8.3.3.3. Anntations
+
+Annotaion 메뉴에서 추가한 `Data sources`는 데이터에 직접적인 영향을 주는 것이 아닌 어노테이션 처리 용도로만 사용합니다.
+
+`Index pattern`은 `kibana_sample_data_flights`로 설정하고, `Time field`는 `timestamp`로 설정합니다.
+그 다음 `Query string`은 `OriginCityName : "Seoul"`로 입력하면 출발지가 서울인 데이터에 대해서만 표출되도록 필터링됩니다.
+
+`Icon`은 어노테이션이 표시되는 아이콘입니다.
+그리고 `Fields`와 `Row template`는 어노테이션에 설정이며, 어노테이션 아이콘에 마우스를 올렸을 때 표출되는 문구를 지정할 수 있습니다.
+`Fields`는 어노테이션 설정을 할 필드이며, 복수인 경우 쉼표(,)를 넣습니다.
+`Row Template`는 어노테이션 설정한 필드를 텍스트로 어떻게 표시할지 입력하며, 두 번의 중괄호(`{{}}`)에 필드명을 적어주면 됩니다.
+`Fields`와 `Row template`를 각각 `OriginCityName, DestCityName`, `{{OriginCityName}} -> {{DestCityName}}`이라고 입력합니다.
+그러면 다음과 같이 출발지가 서울인 경우에 대해, OriginCityName과 DestiCityName을 어노테이션으로 표시합니다.
+
+<img width="1131" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/3bb8efad-77a9-4d78-b97e-01ecaa474aec">
+
+## 8.4. 대시보드
+
+### 8.4.2. 대시보드 만들기
+
+대시보드는 **시각화에서 만들었던 다양한 타입들을 잘 조합하고 배치해 한 눈에 들어오도록 보여주는 것**입니다.
+
+메뉴의 `Kibana > Dashboards`로 이동하면 다음과 같은 화면을 볼 수 있습니다.
+
+<img width="1128" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/107a1295-2cfc-4202-8e8d-131cc8733db7">
+
+여기서 `Create dashboard` 버튼을 누르면 새로운 대시보드를 만들 수 있습니다.
+대시보드를 생성하면 아무것도 표시되지 않은 빈 화면을 볼 수 있습니다.
+
+<img width="1144" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/b8c1831b-6451-4ccb-957b-a34415fdf803">
+
+우측 상단 메뉴에서 `Add`를 누르면 패널을 추가할 수 있습니다. 여기는 `Flights` 샘플 데이터 중 다음과 같이 4개의 패널을 선택합니다.
+
+<img width="569" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/1c3a3ee5-16fe-405a-a3a7-df9688ba45bb">
+
+그러면 아래와 같은 화면이 표시됩니다. **창 이동**을 하고 싶다면 **패널 상단을 클릭한 채 드래그**하면 되고,
+**패널 크기를 조절**하고 싶다면 **패널의 오른쪽 하단을 드래그**하면 됩니다.
+
+<img width="757" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/0745e6b1-5f9b-48ea-8a39-f54e4f9a7285">
+
+이미지에 표시된 **범례 표시 여부** 버튼을 클릭하여 범례가 보이지 않도록 설정을 변경하고, 파란색 영역을 드래그하여 타임 피커를 변경해봅시다.
+그 다음 `ES-Air`를 선택하여 필터 설정도 해줍니다. 그러면 다음과 같이 변경된 화면을 볼 수 있습니다.
+
+<img width="697" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/b27522d2-c7e7-4dc6-8f6e-58ea89676ff3">
+
+이렇게 만들어진 대시보드는 저장하여 재활용하거나 편집을 할 수 있으며, 다른 웹 페이지에 임베딩하거나 링크를 통해 공유할 수도 있습니다.
 
 > 본 게시글은 [엘라스틱 스택 개발부터 운영까지](https://product.kyobobook.co.kr/detail/S000001932755) 도서를 참고하여 작성되었습니다.
 >
