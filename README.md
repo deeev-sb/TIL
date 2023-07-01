@@ -14,8 +14,6 @@
 
 ⬜️ [[강의] 모든 개발자를 위한 HTTP 웹 기본 지식](docs/http-web-network)
 
-⬜️ [[책] 스프링 인 액션](docs/springInAction)
-
 
 ## Elastic Stack
 
