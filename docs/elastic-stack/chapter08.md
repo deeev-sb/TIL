@@ -409,6 +409,39 @@ Annotaion 메뉴에서 추가한 `Data sources`는 데이터에 직접적인 영
 캔버스는 **인포그래픽 형태로 데이터를 프레젠테이션할 수 있게 해주는 툴**입니다.
 캔버스를 사용하면 보고서나 인포그래픽 형태의 대시보드를 생성할 수 있습니다. 이미지나 폰트 종류와 크기, 색상까지 변경이 가능하며, css 편집도 가능합니다
 
+메뉴의 `Kibana > Canvas`로 이동하면 다음과 같이 샘플 데이터에서 제공하는 캔버스들이 보입니다.
+
+<img width="881" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/b0c045ec-7498-4132-a3b6-783c8e90ea6e">
+
+이렇게 샘플로 제공되는 캔버스를 이용해 캔버스에 대해 익혀보도록 하겠습니다. 목록에서 `[Flights] Overview`를 선택하면 아래와 같은 화면을 볼 수 있습니다.
+
+<img width="1272" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/e64ede6c-9b66-4e56-a322-6f2d3fffbae8">
+
+여기에 사용된 텍스트는 마크다운 객체이며, 비행기 모양의 아이콘은 이미지 객체입니다. 그리고 숫자는 텍스트 객체에서 메트릭 값을 표현한 것 입니다.
+
+객체를 클릭하면 객체가 갖는 속성에 맞춰 오른쪽 인터페이스의 서식이나 설정 메뉴들이 변경됩니다.
+이렇게 **객체화된 데이터는 동적으로 변경**할 수 있습니다.
+
+`122 AIRPORTS`를 클릭하면 `Display`, `Data` 메뉴가 우측에 표시됩니다. 그 중 `Data`를 클릭하면 아래와 같이 `Elasticsearch SQL`이 표출되는 것을 확인할 수 있습니다.
+이를 통해 여기서는 Elasticsearch SQL을 통해 데이터를 가져온다는 사실을 알 수 있습니다.
+
+
+<img width="632" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/a797f2d5-ed00-46da-bbfa-846a66814702">
+
+`Elasticsearch SQL` 외에도 다양한 방법으로 데이터 소스를 가져올 수 있습니다.
+
+| 데이터 소스                      | 설명                            |
+|:----------------------------|:------------------------------|
+| Timelion                    | Timelion 문법을 이용해 시계열 데이터 시각화  |
+| Demo Data                   | 프로젝트에 상관없이 데모로 제공하는 데이터 사용 가능 |
+| Elasticsearch SQL           | 엘라스틱서치 쿼리 구문 사용               |
+| Elasticsearch raw documents | 엘라스틱서치 데이터를 집계 과정 없이 직접 가져옴   |
+
+이 중, 샘플에서 사용한 Elasticsearch SQL문으로 데이터를 가져오는 것이 가장 일반적입니다.
+
+
+
+
 
 > 본 게시글은 [엘라스틱 스택 개발부터 운영까지](https://product.kyobobook.co.kr/detail/S000001932755) 도서를 참고하여 작성되었습니다.
 >
