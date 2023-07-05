@@ -50,7 +50,7 @@ softwareupdate --install-rosetta
 
 <img width="150" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/6889f062-d1df-4616-a956-e37e36576b10">
 
-다운로드 받은 tar.gz 파일을 풀고 `logstash-7.10.2` 디렉토리로 이동합니다.
+다운로드 받은 tar.gz 파일을 풀고 `logstash-7.10.2` 디렉터리로 이동합니다.
 
 <img width="928" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/732785ee-8413-4857-91d8-942a569b0817">
 
