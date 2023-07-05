@@ -266,10 +266,10 @@ filebeat.config.modules:
 
 <img width="506" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/3367a932-be9d-4b8f-9f5c-ec230211e8a0">
 
-이제 **모듈 속성 파일**을 수정해보겠습니다. `modules.d` 디렉토리로 이동한 다음, `logstash.yml` 파일을 열어줍니다.
+이제 **모듈 속성 파일**을 수정해보겠습니다. `modules.d` 디렉터리로 이동한 다음, `logstash.yml` 파일을 열어줍니다.
 참고로, 비활성화된 모듈은 `disabled` 확장자가 붙어 있고, 활성화된 모듈은 disabled 확장자가 빠져있습니다.
 
-logstash.yml 을 열었다면, 아래와 같이 `var.paths` 를 logstash의 logs 디렉토리로 설정합니다.
+logstash.yml 을 열었다면, 아래와 같이 `var.paths` 를 logstash의 logs 디렉터리로 설정합니다.
 
 <img width="633" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/3251c5a9-f701-4828-a96d-1dcb96069b6b">
 
