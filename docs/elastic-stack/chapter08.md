@@ -439,9 +439,54 @@ Annotaion 메뉴에서 추가한 `Data sources`는 데이터에 직접적인 영
 
 이 중, 샘플에서 사용한 Elasticsearch SQL문으로 데이터를 가져오는 것이 가장 일반적입니다.
 
+### 8.5.1. 엘라스틱서치 SQL
 
+엘라스틱서치 SQL 쿼리로 요청을 하면 내부적으로 엘라스틱서치의 쿼리 DSL 형태로 변형하고 최적화하는 형태로 동작합니다.
+6.3 버전부터 지원되기 때문에 6.3 이전 버전에서는 사용할 수 없으며, 아직 제약이 조금 있지만 추후 버전에서 계속 개선될 예정입니다.
 
+엘라스틱서치 SQL 문의 `SELECT`문법은 다음과 같습니다.
 
+```text
+SELECT select_expr [, ...]
+[ FROM table_name ]
+[ WHERE condition ]
+[ GROUP BY grouping_element [, ...] ]
+[ HAVING condition ]
+[ ORDER BY expression [ ASC | DESC ] [, ...] ]
+[ LIMIT [ count ] ]
+[ PIVOT (aggregation_expr FOR column IN ( value [ [ AS ] alias ] [, ...] ) ) ]
+```
+
+엘라스틱서치에서는 SQL 문 지원을 위해 `_sql` 이라는 API를 제공하고 있습니다.
+그렇기에 다음과 같이 키바나 콘솔에서 직접 엘라스틱서치 SQL 문을 사용할 수 있습니다.
+
+```bash
+POST _sql?format=txt
+{
+  "query" : "DESCRIBE kibana_sample_data_flights"
+}
+```
+
+여기서 `format=txt` 옵션은 SQL 쿼리 결과를 JSON이 아닌 텍스트 형태로 표출한다는 의미이며, SQL 문은 JSON 형태보다 **텍스트 형태가 가독성이 더 높기** 때문에 가능하면 해당 옵션을 붙이는 것이 좋습니다.
+
+<img width="1267" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/f6d681de-1ad7-4601-8abb-aedfa0830e8f">
+
+조금 더 복잡한 여러 줄의 쿼리를 실행한다면 다음과 같이 `"""`로 감싸면 됩니다.
+
+```bash
+POST _sql?format=txt
+{
+  "query": 
+  """
+    SELECT Dest FROM kibana_sample_data_flights
+    WHERE OriginCountry='US'
+    ORDER BY DistanceMiles
+    DESC LIMIT 10
+  """
+}
+```
+
+<img width="1209" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/a0fab832-325e-4768-9ec5-0b908aed0a9e">
 
 > 본 게시글은 [엘라스틱 스택 개발부터 운영까지](https://product.kyobobook.co.kr/detail/S000001932755) 도서를 참고하여 작성되었습니다.
 >
