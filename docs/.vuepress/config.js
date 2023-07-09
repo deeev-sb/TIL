@@ -25,7 +25,6 @@ module.exports = {
         ],
         sidebar: [
             sidebar.getSidebarGroup('git-posting', 'Git'),
-            sidebar.getSidebarGroup('springBasic', '[강의] 스프링 핵심 원리 - 기본편'),
             sidebar.getSidebarGroup('http-web-network', '[강의] 모든 개발자를 위한 HTTP 웹 기본 지식'),
             sidebar.getSidebarGroup('java-posting', 'Java'),
             sidebar.getSidebarGroup('java8', '[강의] 더 자바, Java 8'),
