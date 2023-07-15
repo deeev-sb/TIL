@@ -23,6 +23,10 @@
 
 ✅ [Elasticsearch Cluster 설정하기](docs/elastic-stack-posting/002.Elasticsearch_Cluster_Setting.md)
 
+✅ [CentOS에서 Elasticsearch 운영 환경 설정](docs/elastic-stack-posting/003.Elasticsearch_Operating_Env_Setting_within_CentOS.md)
+
+⬜️ [Search Guard 적용하기](docs/elastic-stack-posting/004.Apply_Search_Guard.md)
+
 ## Docker & Kubernetes
 
 ✅ [[책] 그림과 실습으로 배우는 도커 & 쿠버네티스](docs/docker&k8s)
