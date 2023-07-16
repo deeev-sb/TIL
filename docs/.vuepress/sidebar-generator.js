@@ -4,7 +4,7 @@ const fs = require('fs');
 const getSidebarGroup = (targetDir = "", title = '', isCollapsable = true) => {
     const workingDir = 'docs';
     const dirAllPath = path.join(workingDir, targetDir);
-    const files = getFiles(dirAllPath); // 디렉토리 읽어옴
+    const files = getFiles(dirAllPath); // 디렉터리 읽어옴
 
     return {
         title: title || targetDir,
