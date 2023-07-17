@@ -657,7 +657,7 @@ A 서버와 B 서버에서 하나의 로그스태시로 전달하거나 하나�
 
 ```yaml
 - pipeline.id: mypipe1
-  path.config: //Users/subin/WorkSpace/TIL/logstash-7.10.2/config/mypipe1.conf
+  path.config: /Users/subin/WorkSpace/TIL/logstash-7.10.2/config/mypipe1.conf
 - pipeline.id: mypipe2
   path.config: /Users/subin/WorkSpace/TIL/logstash-7.10.2/config/mypipe2.conf
 ```
