@@ -479,7 +479,10 @@ filter {
 만약, `new_timestamp` 대신 `timestamp`를 사용하면 기존 필드의 내용을 덮어쓰게 됩니다.
 `Asia/Seoul`는 타임존을 지정한 것으로, 지정하지 않으면 로컬 PC(서버)의 타임존을 적용하게 됩니다.
 
-<img width="673" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/fb4de552-dabd-424e-9ae4-05270432d0f3">
+<img width="671" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/0776218d-05b9-4a82-9957-5439597774ed">
+
+그런데 실제로 출력된 값을 보면 `UTC`를 기준으로 날짜와 시간이 설정된 것을 볼 수 있습니다. 
+이렇게 저장이 된 이유는 **엘라스틱서치에서 사용하는 타임존이 `UTC`이기 때문**입니다.
 
 로그스태시에서 사용하는 날짜/시간 포맷은 **Joda Time 라이브러리**를 사용하며, 패턴은 다음과 같습니다.
 
@@ -836,3 +839,5 @@ xpack을 사용해야 하기 때문에 Apache 2.0 License만 사용하는 OSS �
 
 추가로 참고한 내용
 - <https://systorage.tistory.com/entry/MacOS-M1%EC%B9%A9%EC%97%90%EC%84%9C-logstash-%EC%84%A4%EC%B9%98%ED%95%98%EA%B8%B0>
+- <https://renuevo.github.io/elastic/elastic-timezone/>
+- <https://discuss.elastic.co/t/elastic-utc-time/191877/4>
