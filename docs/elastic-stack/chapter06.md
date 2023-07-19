@@ -483,6 +483,10 @@ filter {
 
 그런데 실제로 출력된 값을 보면 `UTC`를 기준으로 날짜와 시간이 설정된 것을 볼 수 있습니다. 
 이렇게 저장이 된 이유는 **엘라스틱서치에서 사용하는 타임존이 `UTC`이기 때문**입니다.
+그렇기에 `Asia/Seoul` 시간대로 지정한 경우, `UTC`로 변환되어 저장됩니다.
+이와 관련하여 [공식 문서](https://www.elastic.co/guide/en/elasticsearch/reference/current/date.html)에서 다음과 같이 설명합니다.
+
+> Internally, dates are converted to UTC (if the time-zone is specified) and stored as a long number representing milliseconds-since-the-epoch.
 
 로그스태시에서 사용하는 날짜/시간 포맷은 **Joda Time 라이브러리**를 사용하며, 패턴은 다음과 같습니다.
 
@@ -840,4 +844,4 @@ xpack을 사용해야 하기 때문에 Apache 2.0 License만 사용하는 OSS �
 추가로 참고한 내용
 - <https://systorage.tistory.com/entry/MacOS-M1%EC%B9%A9%EC%97%90%EC%84%9C-logstash-%EC%84%A4%EC%B9%98%ED%95%98%EA%B8%B0>
 - <https://renuevo.github.io/elastic/elastic-timezone/>
-- <https://discuss.elastic.co/t/elastic-utc-time/191877/4>
+- <https://www.elastic.co/guide/en/elasticsearch/reference/current/date.html>
