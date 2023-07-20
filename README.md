@@ -2,7 +2,11 @@
 
 ## Java
 
+### Book & Lecture
+
 ✅ [[강의] 더 자바, Java 8](docs/java8)
+
+### Posting
 
 ✅ [MAT으로 Heap Dump 분석하기](docs/java-posting/001.Analyzing_Heap_Dump_with_MAT.md)
 
@@ -15,9 +19,13 @@
 
 ## Elastic Stack
 
+### Book & Lecture
+
 ✅ [[강의] ELK 스택으로 데이터 분석 - 7.10.2 ver](docs/analyze-data-with-elk-stack)
 
 ⬜️ [[책] Elastic Stack 개발부터 운영까지 - 7.10.2 ver](docs/elastic-stack)
+
+### Posting
 
 ✅ [CentOS 환경에 Elastic Stack 구축하기](docs/elastic-stack-posting/001.Deploy_Elastic_Stack_within_CentOS.md)
 
