@@ -123,7 +123,23 @@
 객체 설계 시 역할(인터페이스)를 먼저 부여하고, 그 역할에 수행하는 구현 객체를 만드는 것이 좋습니다.
 그리고 수많은 객체 클라이언트(요청)와 객체 서버(응답)는 서로 협력 관계를 가집니다.
 
+### 1.3.2. 자바 언어의 다형성
 
+인터페이스를 구현하기 위해 오버라이딩된 메서드를 실행하는 것에 대해 생각해봅시다.
+다음과 같이 인터페이스를 다형성으로 구현한 객체는 실행 시점에 유연하게 변경할 수 있습니다.
+
+
+
+코드로 살펴보면 다음과 같으며, 둘 중 어떤 것이든 사용할 수 있습니다.
+
+```java
+public class MemberService {
+	// private MemberRepository memberRepository = new MemoryMemberRepository();
+	private MemberRepository memberRepository = new JdbcMemberRepository();
+}
+```
+
+이러한 점은 인터페이스 뿐만 아니라, 상속 관계에서도 다형성, 오버라이딩을 적용할 수 있습니다.
 
 
 > 본 게시글은 [스프링 핵심 원리 - 기본편](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81-%ED%95%B5%EC%8B%AC-%EC%9B%90%EB%A6%AC-%EA%B8%B0%EB%B3%B8%ED%8E%B8) 강의를 참고하여 작성되었습니다.
