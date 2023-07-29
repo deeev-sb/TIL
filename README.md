@@ -35,6 +35,10 @@
 
 ⬜️ [Search Guard 적용하기](docs/elastic-stack-posting/004.Apply_Search_Guard.md)
 
+✅ [Log Data Practice 1 - Log Data 가공 후 Elasticsearch 저장하기](docs/elastic-stack-posting/005.Log_Data_Practice.md)
+
+✅ [Log Data Practice 2 - 지리적 데이터가 포함된 Log Data 가공](docs/elastic-stack-posting/006.Log_Data_Practice_2.md)
+
 ## Docker & Kubernetes
 
 ✅ [[책] 그림과 실습으로 배우는 도커 & 쿠버네티스](docs/docker&k8s)
