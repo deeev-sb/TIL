@@ -117,6 +117,58 @@ Accept: text/*;q=0.3, text/html;q=0.7, text/html;level=1, text/html;level=2;q=0.
 2. 구체적인 것이 더 우선순위가 높다
 3. 구체적인 것을 기준으로 미디어 타입을 맞춘다.
 
+## 7.4. 전송 방식
+
+전송 방식은 다음과 같이 네 가지로 분류할 수 있습니다.
+
+- 단순 전송
+- 압축 전송
+- 분할 전송
+- 범위 전송
+
+먼저 **단순 전송**은 한 번에 요청하고 `Content-Length` 길이만큼 한 번에 응답하는 것입니다.
+
+<img width="420" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/58180892-bf59-4ed4-a791-53f3731a1285">
+
+그리고 **압축 전송**은 요청에 대한 응답 데이터를 압축하여 전송하는 것입니다. 단순 전송과 같은 내용을 응답으로 내려준다고 할 때, 아래와 같이 압축을 하여 더 적은 `Content-Length`를 보내는 것을 확인할 수 있습니다.
+이 때, `Content-Encoding`에 어떤 것을 사용하여 압축하였는지에 대한 정보를 반드시 함께 보내야 합니다.
+
+<img width="420" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/b0ade39a-9c1d-44f7-b80b-cacee4906201">
+
+**분할 전송**은 `Transfer-Encoding: chunked`를 헤더에 포함하여 분할 전송임을 명시해야 합니다. 분할 전송은 지정한 크기만큼 데이터를 잘라 보내는 것이며, 아래 이미지의 경우 5 bytes씩 데이터를 전송합니다.
+그리고 데이터 전송이 끝나면 `0`과 `\r\n`을 순서대로 전송하여 더 이상 보낼 데이터가 없음을 명시해야 합니다. 분할 전송의 경우, 전체 길이를 예측할 수 없기에 응답 헤더에 `Content-Length`를 포함하지 않습니다.
+
+<img width="420" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/4ba361d3-8102-41bd-bbac-b61b816937cf">
+
+마지막으로 **범위 전송**은 범위를 지정하여 요청하면 그만큼을 응답하는 것입니다. 범위 전송은 주로 응답을 받던 중 연결이 끊어지면, 연결이 끊어긴 지점부터 데이터를 요청하기 위해 사용합니다.
+
+<img width="420" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/7afa8d0a-1208-4054-804f-6ab19556b06b">
+
+## 7.5. 일반 정보
+
+HTTP 헤더를 구성하는 일반 정보는 다음과 같습니다.
+
+- From : 유저 에이전트의 이메일 정보
+  - 요청 헤더에서 사용
+  - 일반적으로 잘 사용되지 않음
+  - 검색 엔진에서 주로 사용
+- Referer : 이전 웹 페이지 주소
+  - 요청 헤더에서 사용
+  - 현재 요청된 페이지의 이전 웹 페이지 주소
+  - `A -> B`로 이동하는 경우, B를 요청할 때 `Referer: A`를 포함하여 요청 ⇒ 유입 경로 분석 가능
+  - 참고로, referer은 referrer의 오타
+- User-Agent: 유저 에이전트 애플리케이션 정보
+  - 요청 헤더에서 사용
+  - e.g. `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/
+    537.36 (KHTML, like Gecko) Chrome/86.0.4240.183 Safari/537.36`
+  - 어떤 종류의 브라우저에서 장애가 발생하는지 파악 가능
+- Server : 요청을 처리하는 ORIGIN 서버의 소프트웨어 정보
+  - 응답 헤더에서 사용
+  - e.g. `Server: Apache/2.2.22 (Debian)`
+  - ORIGIN 서버는 실제로 요청을 처리하는 서버를 의미함
+- Date : 메시지가 발생한 날짜와 시간
+  - 응답 헤더에서 사용
+  - e.g. `Tue, 15 Nov 1994 08:12:31 GMT`
 
 > 본 게시글은 [모든 개발자를 위한 HTTP 웹 기본 지식](https://www.inflearn.com/course/http-%EC%9B%B9-%EB%84%A4%ED%8A%B8%EC%9B%8C%ED%81%AC/dashboard) 강의를 참고하여 작성되었습니다.
 >
