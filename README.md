@@ -39,6 +39,9 @@
 
 ✅ [Log Data Practice 2 - 지리적 데이터가 포함된 Log Data 가공](docs/elastic-stack-posting/006.Log_Data_Practice_2.md)
 
+✅ [Logstash에서 Elasticsearch 인덱스를 KST로 생성하기](docs/elastic-stack-posting/007.Create_ES_index_as_KST_in_Logstash.md)
+
+
 ## Docker & Kubernetes
 
 ✅ [[책] 그림과 실습으로 배우는 도커 & 쿠버네티스](docs/docker&k8s)
