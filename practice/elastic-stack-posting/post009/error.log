@@ -1,0 +1,14 @@
+2023-08-10 13:30:55.462 ERROR ExceptionHandler -- key=[null] request_id=[request-id-1] url=[/] error_message=[org.springframework.web.server.ResponseStatusException: 404 NOT_FOUND
+org.springframework.web.reactive.DispatcherHandler.lambda$createNotFoundError$3(DispatcherHandler.java:159)]
+2023-08-10 13:31:42.760 ERROR ExceptionHandler -- key=[api-key2] request_id=[request-id-2] url=[/api/get] error_message=[org.springframework.web.server.ResponseStatusException: 304 NOT_MODIFIED ""
+com.test.api.filters.DefaultGlobalFilter$1.lambda$writeWith$2(DefaultGlobalFilter.java:127)]
+2023-08-10 13:32:19.765 ERROR ExceptionHandler -- key=[api-key1] request_id=[request-id-3] url=[/api/post] error_message=[org.springframework.web.server.ResponseStatusException: 400 BAD_REQUEST "{"description":"Check latlng field.","error":2000,"section":211}"
+com.test.api.filters.DefaultGlobalFilter$1.lambda$writeWith$2(DefaultGlobalFilter.java:127)]
+2023-08-10 13:32:44.070 ERROR ExceptionHandler -- key=[api-key1] request_id=[request-id-4] url=[/api/post] error_message=[com.test.api.BadRequestException: 'datetime'이(가) 'null'입니다, 공백일 수 없습니다
+com.test.api.filters.factory.ValidationGatewayFilterFactory.validation(ValidationGatewayFilterFactory.java:110)]
+2023-08-10 13:33:22.436 ERROR ExceptionHandler -- key=[api-key2] request_id=[request_id-5] url=[/api/get] error_message=[org.springframework.web.server.ResponseStatusException: 400 BAD_REQUEST "{
+        "detail" : "ERROR_CLIENT_REQUEST",
+        "message" : "Bad Request",
+        "status" : 400
+}
+"
