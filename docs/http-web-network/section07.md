@@ -148,27 +148,148 @@ Accept: text/*;q=0.3, text/html;q=0.7, text/html;level=1, text/html;level=2;q=0.
 
 HTTP 헤더를 구성하는 일반 정보는 다음과 같습니다.
 
-- From : 유저 에이전트의 이메일 정보
+- `From` : 유저 에이전트의 이메일 정보
   - 요청 헤더에서 사용
   - 일반적으로 잘 사용되지 않음
   - 검색 엔진에서 주로 사용
-- Referer : 이전 웹 페이지 주소
+- `Referer` : 이전 웹 페이지 주소
   - 요청 헤더에서 사용
   - 현재 요청된 페이지의 이전 웹 페이지 주소
   - `A -> B`로 이동하는 경우, B를 요청할 때 `Referer: A`를 포함하여 요청 ⇒ 유입 경로 분석 가능
   - 참고로, referer은 referrer의 오타
-- User-Agent: 유저 에이전트 애플리케이션 정보
+- `User-Agent`: 유저 에이전트 애플리케이션 정보
   - 요청 헤더에서 사용
   - e.g. `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/
     537.36 (KHTML, like Gecko) Chrome/86.0.4240.183 Safari/537.36`
   - 어떤 종류의 브라우저에서 장애가 발생하는지 파악 가능
-- Server : 요청을 처리하는 ORIGIN 서버의 소프트웨어 정보
+- `Server` : 요청을 처리하는 ORIGIN 서버의 소프트웨어 정보
   - 응답 헤더에서 사용
   - e.g. `Server: Apache/2.2.22 (Debian)`
   - ORIGIN 서버는 실제로 요청을 처리하는 서버를 의미함
-- Date : 메시지가 발생한 날짜와 시간
+- `Date` : 메시지가 발생한 날짜와 시간
   - 응답 헤더에서 사용
   - e.g. `Tue, 15 Nov 1994 08:12:31 GMT`
+
+## 7.6. 특별한 정보
+
+이번에는 특별한 정보를 제공하는 HTTP 헤더에 대해 알아보겠습니다.
+
+### 7.6.1. Host
+
+`Host`는 `www.google.com`과 같이 **요청한 호스트 정보(도메인)** 정보를 입력하며, 요청 헤더에 **필수**로 포함하는 값입니다.
+`Host`를 입력함으로서 하나의 서버가 여러 도메인을 처리하거나 하나의 IP 주소에 여러 도메인이 적용되어 있어도 구분할 수 있습니다.
+
+만약 다음과 같이 Host를 입력하지 않고 보내는 경우, 서버는 어디로 들어온 요청인지 알 수 없어 처리를 하지 못하게 됩니다.
+이처럼 하나의 IP 주소를 가진 서버에 여러 도메인이 존재하면, TCP는 기본적으로 IP로 통신되기에 연결은 되지만 실질적인 응답은 받을 수 없게 됩니다.
+
+<img width="400" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/3ba6e427-8dee-46b8-84b2-07d77411c2e7">
+
+초창기에는 위처럼 Host를 입력하지 않아 문제가 많이 발생하게 되었고, 나중에 Host를 필수 입력으로 스펙을 변경하게 됩니다.
+Host를 입력함으로서 하나의 IP 주소에 여러 도메인이 존재하더라도 어디로 들어온 요청인지 구분할 수 있습니다.
+
+<img width="399" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/1a4be0c6-44d0-4e61-aa69-b31dfd2d85f3">
+
+### 7.6.2. Location
+
+`Location`은 **페이지 리다이렉션** 정보를 나타내는 헤더입니다.
+**3xx 응답 결과**에 Location 헤더가 있으면, Location 값(대상 리소스)으로 자동으로 이동(리다이렉트)합니다.
+
+**201 응답 결과**에서도 Location을 사용하기도 하는데, 이 때 Location 값은 생성된 리소스 URI 입니다.
+
+### 7.6.3. Allow
+
+`Allow`는 **허용 가능한 HTTP 메서드 정보**를 나타내는 헤더입니다.
+`405 (Method not Allowed)`에서 응답에 `Allow: GET, HEAD` 와 같은 `Allow` 헤더 정보를 포함해야 합니다.
+
+### 7.6.4. Retry-After
+`Retry-After`는 **유저 에이전트가 다음 요청을 하기까지 기다려야 하는 시간**을 알려줍니다.
+`503 (Service Unavailable)`과 같은 에러가 발생하면, 서비스가 언제까지 불능인지 알려줄 때 사용합니다.
+`Retry-After: Fri, 32 Dec 1999 23:59:59 GMT`와 같이 날짜로 표기할 수도 있고, `Retry-After: 120` 과 같이 초단위로 표기할 수도 있습니다.
+
+## 7.7. 인증
+
+인증과 관련된 헤더는 다음과 같이 두 가지입니다.
+
+- `Authorization` : 클라이언트 인증 정보를 서버에 전달
+- `WWW-Authenticate` : 리소스 접근 시 필요한 인증 방법 정의
+  - `401 Unauthorized` 응답과 함께 사용
+  - e.g. `WWW-Autenticate: Newauth realm="apps", type=1, title="Login to \"apps\"", Basic realm="simple"`
+
+## 7.8 쿠키
+
+쿠키를 사용할 때는 다음과 같은 헤더를 사용합니다.
+
+- `Set-Cookie` : 서버에서 클라이언트로 쿠키 전달 (응답)
+- `Cookie` : 클라이언트가 서버에서 받은 쿠키를 저장하고, HTTP 요청 시 서버로 전달
+
+그렇다면 쿠키는 무엇일까요? 지금부터 쿠키에 대해 알아보도록 하겠습니다.
+
+먼저 쿠키를 사용하지 않는 경우 어떻게 되는지 살펴보겠습니다.
+다음과 같이 `/welcom`으로 접속하면 로그인 하지 않은 경우 "안녕하세요. 손님"이라는 문장을 반환하고, 로그인한 경우 사용자의 이름을 손님 대신 사용하는 서비스가 있습니다.
+~~welcome인데 오타가 난 채로 이미지를 만들어버렸네요..ㅎㅎ..~~
+
+<img width="277" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/d0118b08-1a7f-45e7-b266-e27b189a0d13">
+
+해당 서비스에 "홍길동"이라는 사용자가 로그인을 했습니다.
+
+<img width="273" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/82e97397-c33f-46fa-955e-ffcc2e9d90d5">
+
+그 다음, 다시 `/welcom`으로 접속하면, 기대와 다르게 "안녕하세요. 손님"이라는 문장을 반환합니다.
+
+<img width="278" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/10bf2bfb-61ce-46e6-a960-cde394aca8c6">
+
+이렇게 되는 이유는 기본적으로 HTTP는 무상태(Stateless) 프로토콜이기 때문입니다.
+무상태 프로토콜은 클라이언트와 서버가 요청과 응답을 주고 받으면 연결이 끊어지며, 클라이언트가 다시 요청을 하였을 때 서버는 이전 요청을 기억하지 못합니다. 즉, 클라이언트와 서버가 서로 상태를 유지하지 않는 것입니다.
+
+이를 해결하기 위한 대안으로는 모든 요청에 사용자 정보를 포함하는 방법이 있습니다. 그러면 다음과 같이 기대했던 "안녕하세요. 홍길동님"이라는 응답을 받을 수 있습니다.
+
+<img width="273" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/f73c897f-923a-4e2b-802e-75bbfdced72e">
+
+그러나 이러한 대안은 심각한 문제가 있습니다. 모든 요청에 사용자 정보를 포함해야 하는 만큼 개발하기 쉽지 않으며, 브라우저를 완전히 종료하고 다시 열면 상태가 모두 사라지게 됩니다. 뿐만 아니라, URI에 정보를 포함하는 만큼 보안에 취약합니다.
+
+이러한 문제를 쿠키를 사용함으로써 해결할 수 있습니다. 다음과 같이 쿠키를 사용하는 서버에 로그인을 하면, 서버는 `Set-Cookie` 헤더에 사용자 정보를 담아 웹 브라우저로 반환합니다.
+그러면 웹 브라우저는 `Set-Cookie`에 담긴 정보를 쿠키 저장소에 저장합니다. 
+
+<img width="274" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/353ec8ae-09e4-4590-a201-f324f034b661">
+
+이렇게 저장된 정보는 웹 브라우저에서 모든 요청에 자동으로 추가하여 서버로 요청을 보냅니다.
+
+<img width="274" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/d3370af6-0e1e-4732-a723-13e2dd571ff4">
+
+쿠키에 대한 전체 내용을 정리해보겠습니다.
+
+- 주로 사용자 로그인 세션 관리에 사용
+- 최근에는 광고 정보 트래킹 활용
+- 쿠키 정보는 항상 서버에 전송되어 네트워크 추가 트래픽을 유발하므로, 최소한의 정보만 사용(세션 id, 인증 토큰)
+- 요청할 때마다 서버에 전송하는 것이 아닌 웹 브라우저 내부에 데이터를 저장하여 사용하고 싶다면 웹 스토리지를 사용하는 것을 추천 (localStorage, sessionStorage) 참고
+- 쿠키나 웹 스토리지에는 보안에 민감한 데이터를 저장하면 안됨(e.g. 주민번호, 신용카드 번호 등등)
+- 서버 세팅 e.g. `Set-cookie: sessionId=abcde1234; expires=Sat, 26-Dec-2020 00:00:00 GMT; path=/; domain=.google.com; Secure 사용처`
+- 쿠키 생명주기
+  - `expires=Sat, 26-Dec-2020 -4:39:21 GMT` : 만료일이 되면 쿠키 삭제
+  - `max-age=3600` : 초 단위. 0이나 음수를 지정하면 쿠키 삭제
+- 쿠키 종류
+  - 세션 쿠키 : 만료 날짜를 생략하면 브라우저 종료 시까지만 유지
+  - 영속 쿠키 : 만료 날짜를 입력하면 해당 날짜까지 유지
+- 도메인 (Domain)
+  - domain을 명시한 경우, 명시한 문서 기준 도메인과 서브 도메인에 쿠키 정보 포함
+    - `domain=example.org` 지정
+      - example.org 쿠키 접근
+      - dev.example.org 쿠키 접근
+  - domain을 생략한 경우, 현재 문서 기준 도메인에만 쿠키 정보 포함
+    - `example.org`에서 쿠키를 생성하고 domain 지정 생략
+      - example.org 쿠키 접근
+      - dev.example.org 쿠키 미접근
+- 경로 (Path)
+  - 경로를 퐇마한 하위 경로 페이지만 쿠키 접근
+  - 일반적으로 `path=/` (루트)로 지정
+  - 만약 `path=/home`으로 지정하면,
+    - `/home` 쿠키 접근
+    - `/home/level1/level2` 쿠키 접근
+    - `/hello` 쿠키 미접근
+- 보안
+  - `Secure` : 일반적으로 쿠키는 http, https 구분하지 않고 전송하는 데, `Secure` 설정 시 https인 경우에만 전송
+  - `HttpOnly` : XSS 공격 방지를 위한 설정으로, 자바스크립트에서 쿠키 접근이 불가하며 HTTP 전송에만 사용 가능
+  - `SameSite` : XSRF 공격 방지를 위한 설정으로, 요청 도메인과 쿠키에 설정된 도메인이 같은 경우에만 쿠키 전송
 
 > 본 게시글은 [모든 개발자를 위한 HTTP 웹 기본 지식](https://www.inflearn.com/course/http-%EC%9B%B9-%EB%84%A4%ED%8A%B8%EC%9B%8C%ED%81%AC/dashboard) 강의를 참고하여 작성되었습니다.
 >
