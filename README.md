@@ -33,13 +33,17 @@
 
 ✅ [CentOS에서 Elasticsearch 운영 환경 설정](docs/elastic-stack-posting/003.Elasticsearch_Operating_Env_Setting_within_CentOS.md)
 
-⬜️ [Search Guard 적용하기](docs/elastic-stack-posting/004.Apply_Search_Guard.md)
+✅ [Search Guard 적용하기](docs/elastic-stack-posting/004.Apply_Search_Guard.md)
 
 ✅ [Log Data Practice 1 - Log Data 가공 후 Elasticsearch 저장하기](docs/elastic-stack-posting/005.Log_Data_Practice.md)
 
 ✅ [Log Data Practice 2 - 지리적 데이터가 포함된 Log Data 가공](docs/elastic-stack-posting/006.Log_Data_Practice_2.md)
 
 ✅ [Logstash에서 Elasticsearch 인덱스를 KST로 생성하기](docs/elastic-stack-posting/007.Create_ES_index_as_KST_in_Logstash.md)
+
+✅ [OpenDistro Security 적용하기](docs/elastic-stack-posting/008.Apply_OpenDistro_Security.md)
+
+✅ [Pipeline-to-Pipeline Communication](docs/elastic-stack-posting/009.Pipeline-to-Pipeline_Communication.md)
 
 
 ## Docker & Kubernetes
