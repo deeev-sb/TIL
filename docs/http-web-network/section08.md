@@ -147,6 +147,65 @@
 
 `Pragma`나 `Expires`는 `Cache-Control`의 하위 호환이며, 지금은 `Cache-Control`을 통해 다 할 수 있습니다.
 
+## 8.4. 프록시 캐시
+
+원(origin) 서버는 요청에 대한 응답을 내려주는 진짜 서버입니다.
+그런데 원 서버가 다음과 같이 미국에 있고, 클라이언트는 한국에 있다면,
+한국에 있는 클라이언트는 매우 느린 속도로 응답을 받게 됩니다. ~~여기서는 최대한 긍적적으로 500ms로 잡았다고 합니다~~
+
+<img width="433" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/4ae7efa9-fdd0-4c8d-8d8f-52517f58d129">
+
+매번 요청할 때마다 느린 속도로 응답을 받지 않게 하기 위해서는 다음과 같이 프록시 캐시 서버를 한국 내에 도입합니다.
+CDN 서비스나 AWS CloudFront가 이러한 프록시 캐시 서버입니다.
+그렇게 되면 웹 브라우저는 한국 내에 있는 프록시 캐시 서버로 요청을 보내도록 되어 있는 것을 확인하고, 프록시 캐시 서버에 요청을 하게 됩니다.
+참고로, 웹 브라우저 내에 있는 캐시는 `private` 캐시이고, 프록시 캐시 서버가 가지는 캐시는 `public` 캐시입니다.
+
+<img width="454" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/43b0dc9a-9115-4159-832d-b84797df5f71">
+
+프록시 캐시 서버가 캐시 데이터를 가지게 되는 방법은 두 가지 정도 있습니다.
+
+1. 웹 브라우저의 최초 요청 시 응답 데이터를 프록시 캐시 서버가 캐시에 저장 (대부분 사용하는 방법)
+2. 원 서버에서 프록시 캐시 서버로 데이터를 밀어 넣음
+
+이 때, public 캐시는 공용으로 쓸 수 있는 데이터만 저장되어야 하며, 사용자와 관련된 데이터가 포함되어서는 안됩니다.
+
+이와 관련된 `Cache-Control`에 대해 살펴보겠습니다.
+
+- `Cache-Control: public` : 응답이 public 캐시에 저장되어도 됨
+- `Cache-Control: private` : 응답이 해당 사용자만을 위한 것임. private 캐시에 저장해야 함 (기본 값)
+- `Cache-Control: s-maxage` : 프록시 캐시에만 적용되는 max-age
+- `Age: 60` (HTTP 헤더) : 오리진(원) 서버에서 응답 후 프록시 캐시 내에 머문 시간 (초)
+
+## 8.5. 캐시 무효화
+
+`Cache-Control`에는 확실한 캐시 무효화 응답이 존재합니다.
+
+- `Cache-Control: no-cache`
+  - 데이터는 캐시해도 되지만, 항상 **원 서버에 검증**하고 사용
+- `Cache-Control: no-store`
+  - 데이터에 민감한 정보가 있으므로 저장하면 안됨 (메모리에서 사용하고 최대한 빨리 삭제)
+- `Cache-Control: must-revalidate`
+  - 캐시 만료 후 최초 조회 시 **원 서버에 검증**해야 함
+  - 원 서버 접근 실패 시 반드시 오류가 발생해야 함 - 504(Gateway Timeout)
+  - must-revalidate는 캐시 유효 시간이라면 캐시를 사용함
+- `Pragma: no-cache`
+  - HTTP 1.0 하위 호환
+
+그런데 `no-cache`와 `must-revalidate`는 유사해보입니다. 이 두 가지는 어떤 차이가 있는지 지금부터 알아보겠습니다.
+
+먼저, `no-cache`는 기본적으로 다음과 같이 요청을 주고 받습니다.
+
+<img width="538" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/1bda2383-9932-40ee-928a-4c0c888c6163">
+
+그런데 만약 순간적으로 네트워크가 단절되어 원 서버에 접근할 수 없다면,
+`no-cache`는 프록시 캐시 서버 벌정에 따라 `Error`를 반환하거나 오래된 데이터를 포함하여 `200 OK`를 내려줍니다.
+
+<img width="498" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/e2e31836-0912-425f-a165-758c9c6c3db6">
+
+`must-revalidate`는 동일한 상황에 무조건 `504 Gateway Timeout`를 반환합니다.
+
+<img width="495" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/7a76eff1-b14a-4690-ae26-4a5aebf583bf">
+
 
 > 본 게시글은 [모든 개발자를 위한 HTTP 웹 기본 지식](https://www.inflearn.com/course/http-%EC%9B%B9-%EB%84%A4%ED%8A%B8%EC%9B%8C%ED%81%AC/dashboard) 강의를 참고하여 작성되었습니다.
 >
