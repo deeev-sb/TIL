@@ -18,6 +18,7 @@
 
 ✅ [[강의] 모든 개발자를 위한 HTTP 웹 기본 지식](docs/http-web-network)
 
+⬜️ [[강의] 스프링 MVC 1편 - 백엔드 웹 개발 핵심 기술](docs/spring-mvc1)
 
 ## Elastic Stack
 
@@ -27,7 +28,7 @@
 
 ⬜️ [[책] Elastic Stack 개발부터 운영까지 - 7.10.2 ver](docs/elastic-stack)
 
-⬜️ [[강의] Elasticsearch Essential](docs/elasticsearch-essential)
+✅ [[강의] Elasticsearch Essential](docs/elasticsearch-essential)
 
 ### Posting
 
