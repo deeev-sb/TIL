@@ -423,12 +423,12 @@ Annotaion 메뉴에서 추가한 `Data sources`는 데이터에 직접적인 영
 이렇게 **객체화된 데이터는 동적으로 변경**할 수 있습니다.
 
 `122 AIRPORTS`를 클릭하면 `Display`, `Data` 메뉴가 우측에 표시됩니다. 그 중 `Data`를 클릭하면 아래와 같이 `Elasticsearch SQL`이 표출되는 것을 확인할 수 있습니다.
-이를 통해 여기서는 Elasticsearch SQL을 통해 데이터를 가져온다는 사실을 알 수 있습니다.
+이를 통해 여기서는 `Elasticsearch SQL`을 통해 데이터를 가져온다는 사실을 알 수 있습니다.
 
 
 <img width="632" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/a797f2d5-ed00-46da-bbfa-846a66814702">
 
-`Elasticsearch SQL` 외에도 다양한 방법으로 데이터 소스를 가져올 수 있습니다.
+`Elasticsearch SQL`을 포함하여 다양한 방법으로 데이터 소스를 가져올 수 있습니다.
 
 | 데이터 소스                      | 설명                            |
 |:----------------------------|:------------------------------|
@@ -437,7 +437,7 @@ Annotaion 메뉴에서 추가한 `Data sources`는 데이터에 직접적인 영
 | Elasticsearch SQL           | 엘라스틱서치 쿼리 구문 사용               |
 | Elasticsearch raw documents | 엘라스틱서치 데이터를 집계 과정 없이 직접 가져옴   |
 
-이 중, 샘플에서 사용한 Elasticsearch SQL문으로 데이터를 가져오는 것이 가장 일반적입니다.
+이 중, 샘플에서 사용한 `Elasticsearch SQL`로 데이터를 가져오는 것이 가장 일반적입니다.
 
 ### 8.5.1. 엘라스틱서치 SQL
 
@@ -457,7 +457,7 @@ SELECT select_expr [, ...]
 [ PIVOT (aggregation_expr FOR column IN ( value [ [ AS ] alias ] [, ...] ) ) ]
 ```
 
-엘라스틱서치에서는 SQL 문 지원을 위해 `_sql` 이라는 API를 제공하고 있습니다.
+엘라스틱서치에서는 SQL문 지원을 위해 `_sql` 이라는 API를 제공하고 있습니다.
 그렇기에 다음과 같이 키바나 콘솔에서 직접 엘라스틱서치 SQL 문을 사용할 수 있습니다.
 
 ```bash
@@ -487,6 +487,79 @@ POST _sql?format=txt
 ```
 
 <img width="1209" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/a0fab832-325e-4768-9ec5-0b908aed0a9e">
+
+방금 사용한 엘라스틱서치 SQL 문이 엘라스틱서치 DSL 문으로 변환하면 다음과 같습니다.
+
+```bash
+GET kibana_sample_data_flights/_search
+{
+  "_source": false,
+  "stored_fields": "_none_",
+  "docvalue_fields": [
+    {
+      "field": "Dest"
+    }
+  ],
+  "query": {
+    "term": {
+      "OriginCountry": {
+        "value": "US",
+        "boost": 1.0
+      }
+    }
+  },
+  "sort": [
+    {
+      "DistanceMiles": {
+        "order": "desc",
+        "missing": "_first",
+        "unmapped_type": "float"
+      }
+    }
+  ],
+  "size": 10
+}
+```
+
+`decovalue_fields`에 우리가 보고 싶어하는 `Dest`를 설정하고, `WHERE`절은 `query`를 사용합니다.
+그리고 `ORDER BY`는 `sort`를 통해 설정하며, `LIMIT`는 `size`로 설정합니다.
+
+## 8.6 맵스
+
+키바나 맵스는 지도 위에 다양한 정보를 표출하는 것으로, 다음과 같이 활용할 수 있습니다.
+
+- 위치 정보가 포함된 데이터를 지도에 올려서 시각화
+- 멀티 레이어 기능을 통해 다양한 형태의 지도를 레이어한 화면 표출
+- 벡터 형태의 폴리곤 시각화
+- 위치/지역 데이터 표현 및 처리할 수 있는 환경 제공
+  - 위치 : 위경도가 포함된 특정 좌표
+  - 지역 : 위치가 모여서 만드는 특정 공간, 경계선
+
+`Kibana > Maps`로 이동하면 다음과 같이 샘플 데이터에 의해 생성된 맵스 시각화들이 보입니다.
+
+<img width="977" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/27a5dbaa-9128-460f-bdf7-2b1b020683c8">
+
+이 중 `[Flights] Origing and Destination Flight Time`을 선택하면 다음과 같은 화면을 볼 수 있습니다. 화면을 보면 멀티 레이어가 지원되는 것을 확인할 수 있고, 선택한 항목에 대한 세부 정보가 표출되는 것도 확인할 수 있습니다.
+
+<img width="764" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/0ee4e334-42f5-4a66-99d6-3cec865c5f1b">
+
+뿐만 아니라 대시보드에 추가해 다른 시각화 객체와도 함께 사용할 수 있습니다.
+
+그리고 `Kibana > Maps`에서 `Create map`을 선택하면, `Add layer`를 클릭하면 다음과 같은 화면을 볼 수 있습니다.
+
+<img width="1139" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/ab98505a-58b1-433e-90f8-95e3a8deeb60">
+
+레이어는 크게 **벡터 레이어**와 **타일 서비스**로 구분할 수 있습니다.
+
+- 벡터 레이어
+  - 점, 선, 폴리곤 등을 표현
+  - Upload GeoJson, Documents, Choropleth, Cluster and grids, Heat map, Point to Point, EMS Boundaries, Configured GeoJSON
+- 타일 서비스
+  - 타일 서버에서 제공하는 타일 서비스를 사용할 수 있음
+  - EMBS Basemap, Configured Tile Map Service, Tile Map Service, Web Map Service, Vector tiles
+
+이 중 `Configured GeoJson`과 `Configured Tile Map Service`는 키바나 설정 파일인 `kibana.yml`을 수정해야 보이는 메뉴입니다.
+
 
 > 본 게시글은 [엘라스틱 스택 개발부터 운영까지](https://product.kyobobook.co.kr/detail/S000001932755) 도서를 참고하여 작성되었습니다.
 >
