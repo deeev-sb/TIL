@@ -650,6 +650,133 @@ helloData.getUsername() = hello
 helloData.getAge() = 20
 ```
 
+## 2.5. HttpServletResponse
+
+`HttpServletResponse`는 HTTP 응답 메시지를 생성하는 역할을 합니다.
+`HttpServletResponse`를 사용하면 HTTP 응답 코드를 지정할 수 있고, 헤더와 바디 생성을 할 수 있습니다.
+그리고 `Content-Type`, 쿠키, `Redirect`와 같은 편의 기능도 제공합니다.
+
+코드를 통해 좀 더 자세히 살펴보도록 하겠습니다.
+
+### 2.5.1. 응답 메시지 생성
+
+```java
+@WebServlet(name = "responseHeaderServlet", urlPatterns = "/response-header")
+public class ResponseHeaderServlet extends HttpServlet {
+
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // [status-line]
+        response.setStatus(HttpServletResponse.SC_OK);
+
+        // [response-headers]
+        response.setHeader("Content-Type", "text/plain;charset=utf-8");
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // 캐시 무효화 설정
+        response.setHeader("Pragma", "no-cache"); // 과거 버전 캐시 무효화
+        response.setHeader("my-header", "hello"); // 임의로 생성한 헤더
+
+        // [message body]
+        PrintWriter writer = response.getWriter();
+        writer.println("ok");
+    }
+}
+```
+
+`setStatus`를 통해 응답 메시지에 **HTTP 응답 코드를 지정**할 수 있습니다.
+`response.setStatus(200)`과 같이 HTTP 응답 코드를 직접 입력할 수도 있지만, `HttpServletResponse.SC_OK`와 같이 제공되는 **매직 넘버를 사용하는 것을 추천**드립니다.
+
+`setHeader`를 통해 **헤더를 생성**할 수 있습니다. 여기서는 `Content-Type`을 `text/plain`으로 지정하였으며, `charset=utf-8`을 통해 encoding을 `utf-8`로 지정하였습니다. 그리고 `Cache-Control`과 `Pragma`는 캐시를 무효화하는 설정을 하였으며, **임의로 생성한 헤더**도 추가할 수 있습니다.
+
+마지막으로 메시지 바디는 `PrintWriter`를 사용하여 데이터를 입력하였습니다.
+
+코드를 직접 실행해보면 다음과 같이 화면에 `ok`라는 문구가 표출되며, 입력한 내용이 응답 데이터로 추가되어 있음을 확인할 수 있습니다.
+
+<img width="941" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/d5132d09-ac19-4ad2-9560-8974887e9c5c">
+
+### 2.5.1. Content 편의 메서드
+
+`HttpServletResponse`에서 제공하는 Content 편의 메서드를 활용하여 더 간단하게 작성할 수 있습니다. 다음은 `response.setHeader("Content-type", "text/plain;charset=utf-8");`에 대한 내용을 Content 편의 메서드를 사용하여 나타내었습니다.
+
+```java
+@WebServlet(name = "responseHeaderServlet", urlPatterns = "/response-header")
+public class ResponseHeaderServlet extends HttpServlet {
+
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // ...
+
+        PrintWriter writer = response.getWriter();
+        writer.print("ok");
+    }
+
+    private void content(HttpServletResponse response) {
+        response.setContentType("text/plain");
+        response.setCharacterEncoding("utf-8");
+        // response.setContentLength(2); // 생략 시 자동 생성
+    }
+}
+```
+
+`setContentType`을 통해 ContentType을 지정하고, `setCharacterEncoding`을 통해 encoding 방식을 지정하였습니다. 그리고 `setContentLength`는 데이터의 길이를 지정하는 것인데, 생략 시 데이터 길이에 맞게 자동 생성해줍니다.
+
+참고로, `writer.println`을 사용하면 뒤에 `\n`이 붙어 글자 길이가 3이 되기 때문에, `writer.print`로 변경 후 실행하였습니다.
+
+<img width="635" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/f112f26d-75fc-42f6-8e4f-3acf65304823">
+
+실행 결과를 확인해보면 입력한 내용이 그대로 반영된 것을 알 수 있고, `Content-Length`가 2로 표출되고 있음도 확인 가능 합니다.
+
+### 2.5.2. 쿠키 편의 메서드
+
+`HttpServletResponse`에서는 쿠키에 대한 편의 메서드도 제공합니다. 다음은 `response.setHeader("Set-Cookie", "myCookie=good; Max-Age=600");`에 대한 내용을 쿠키 편의 메서드를 사용하여 나타내었습니다.
+
+```java
+@WebServlet(name = "responseHeaderServlet", urlPatterns = "/response-header")
+public class ResponseHeaderServlet extends HttpServlet {
+
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // ...
+    }
+
+    private void cookie(HttpServletResponse response) {
+        Cookie cookie = new Cookie("myCookie", "good");
+        cookie.setMaxAge(600); // 600초 동안 유효
+        response.addCookie(cookie);
+    }
+}
+```
+
+`Cookie` 객체를 생성하여 설정을 추가하고, `addCookie`를 통해 쿠키 정보를 입력하면 됩니다. 참고로 이전의 쿠키 관련 설정은 그대로 유지하여도 상관없습니다. 뒤에 입력된 내용이 우선순위가 더 높기 때문입니다.
+
+코드를 실행해보면 다음과 같이 입력한 쿠키 정보가 헤더에 포함되어 있는 것을 확인할 수 있습니다.
+
+<img width="638" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/8a6d55ad-b8c3-4f28-a277-0151db27f403">
+
+### 2.5.3. Redirect 편의 메서드
+
+마지막으로 Redirect 편의 메서드에 대해 알아보겠습니다. `Status Code`를 302로 설정하고, `/basic/hello-form.html`로 반환되도록 설정해보았습니다.
+
+```java
+@WebServlet(name = "responseHeaderServlet", urlPatterns = "/response-header")
+public class ResponseHeaderServlet extends HttpServlet {
+
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // ..
+    }
+
+    private void redirect(HttpServletResponse response) throws IOException {
+        response.setStatus(HttpServletResponse.SC_FOUND);
+        response.sendRedirect("/basic/hello-form.html");
+    }
+}
+```
+
+`sendRedirect` 내에 입력한 URL로 Redirect가 됩니다. 만약 편의 메서드를 사용하지 않고 `setHeader`를 통해 Redirect 정보를 입력하고 싶다면, `response.setHeader("Location", "/basic/hello-form.html");`라고 작성하면 됩니다.
+
+실행 후 헤더 정보를 확인해보면, 상태 코드가 302이고 Location 정보를 통해 이동된 화면이 표출되는 것을 알 수 있습니다.
+
+<img width="949" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/b7c1863c-262c-40e7-bf28-a0ef16c103bd">
 
 
 > 본 게시글은 [스프링 MVC 1편 - 백엔드 웹 개발 핵심 기술](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81-mvc-1) 강의를 참고하여 작성되었습니다.
