@@ -778,6 +778,72 @@ public class ResponseHeaderServlet extends HttpServlet {
 
 <img width="949" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/b7c1863c-262c-40e7-bf28-a0ef16c103bd">
 
+## 2.6. HTTP 응답 데이터
+
+HTTP 응답 메시지는 주로 다음과 같은 방식으로 내용을 담아서 전달합니다.
+
+- 단순 텍스트 응답
+- HTML 응답
+- HTTP API - MessageBody JSON 응답
+
+이 중, 단순 텍스트 응답은 앞에서 살펴본 `writer.println("ok")`이므로 해당 내용은 생략하고 알아보도록 하겠습니다.
+
+### 2.6.1. HTML 응답
+
+HTTP 응답으로 HTML을 반환할 때는 `Content-Type`을 `text/html`로 지정해야 합니다.
+
+```java
+@WebServlet(name = "responseHtmlServlet", urlPatterns = "/response-html")
+public class ResponseHtmlServlet extends HttpServlet {
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Content-Type: text/html;charset=utf-8
+        response.setContentType("text/html");
+        response.setCharacterEncoding("utf-8");
+
+        PrintWriter writer = response.getWriter();
+        writer.println("<html>");
+        writer.println("<body>");
+        writer.println(" <div>안녕?</div>");
+        writer.println("</body>");
+        writer.println("</html>");
+    }
+}
+```
+
+해당 코드를 실행한 다음 응답 내용을 보면 입력한 HTML이 내려온 것을 확인할 수 있습니다.
+
+<img width="946" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/6e0d4f10-66e9-4aab-a0ce-f293416f55dd">
+
+### 2.6.2. HTTP API - MessageBody JSON 응답
+
+HTTP 응답으로 JSON을 반환할 때는 `Content-Type`을 `application/json`으로 지정해야 합니다. 그리고 Jackson 라이브러리가 제공하는 `objectMapper.writeValueAsString()`을 사용하면 객체를 JSON 문자로 변경할 수 있습니다.
+
+```java
+@WebServlet(name = "responseJsonServlet", urlPatterns = "/response-json")
+public class ResponseJsonServlet extends HttpServlet {
+    private ObjectMapper objectMapper = new ObjectMapper();
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Content-Type: application/json
+        response.setContentType("application/json");
+        response.setCharacterEncoding("utf-8");
+
+        HelloData helloData = new HelloData();
+        helloData.setUsername("kim");
+        helloData.setAge(20);
+
+        // {"username": "kim", "age": 20}
+        String result = objectMapper.writeValueAsString(helloData);
+        response.getWriter().write(result);
+    }
+}
+```
+
+실제로 실행해보면 화면에 Json 형식의 데이터가 출력되는 것을 확인할 수 있으며, 지정한 헤더로 설정되어 있는 것도 알 수 있습니다.
+
+<img width="943" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/2be1bf9a-7ae9-44c6-b4c0-87a64a805ec4">
+
 
 > 본 게시글은 [스프링 MVC 1편 - 백엔드 웹 개발 핵심 기술](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81-mvc-1) 강의를 참고하여 작성되었습니다.
 >
