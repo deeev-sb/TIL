@@ -421,7 +421,210 @@ JSP는 자바 코드를 그대로 사용할 수 있습니다.
 
 이러한 문제를 해결하기 위해 등장한 것이 **MVC 패턴**입니다. 3.4 부터는 MVC 패턴에 대해 알아보고, 적용해보도록 하겠습니다.
 
+## 3.4. MVC 패턴
 
+### 3.4.1. MVC 패턴 개요
+
+MVC 패턴에 대해 알아보기 전 서블릿과 JSP의 단점을 정리해보겠습니다.
+
+- 하나의 서블릿이나 JSP만으로 비즈니스 로직과 뷰 렌더링을 모두 처리하게 되면, **너무 많은 역할**을 하기에 유지보수가 어려워짐
+- 비즈니스 로직과 UI **변경에 대한 라이프 사이클이 달라** 하나의 코드로 관리하는 것은 유지보수 관점에서 좋지 않음
+- JSP와 서블릿은 **최적화된 업무를 담당하고 있지 않음.** (JSP는 화면 렌더링에 최적화되어 있고, 서블릿은 비즈니스 코드에 최적화되어 있음)
+
+하나의 서블릿이나 JSP로 처리하여 발생하는 단점을 해결하기 위해 **컨트롤러와 뷰**라는 영역으로 나눈 것이 **MVC 패턴**입니다. 정확히는, **모델(Model), 뷰(View), 컨트롤러(Controller)** 로 구성되어 있으며, 주로 웹 애플리케이션에서 사용합니다. 간단하게 나타내면 다음과 같습니다.
+
+<img width="549" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/8c6c7afa-1258-48f0-89eb-cfcfa7d31178">
+
+**컨트롤러(Controller)** 는 HTTP 요청을 받아서 파라미터를 검증하고, **비즈니스 로직을 실행**합니다. 그리고 데이터를 조회하여 뷰에 전달할 결과를 모델에 담습니다.
+**모델(Model)** 은 뷰에 출력할 데이터를 담고 있으며, 그 덕분에 뷰는 비즈니스 로직이나 데이터 접근에 대해 알 필요 없이 그저 화면에 대한 렌더링에만 집중할 수 있습니다.
+**뷰(View)** 는 모델에 담겨있는 데이터를 사용하여 화면을 그리는 역할을 합니다. 즉, HTML을 생성하는 역할을 담당합니다.
+
+MVC 패턴의 실제 구조는 다음과 같습니다. 실제로는 Controller는 컨트롤러 로직을 수행하며, 비즈니스 로직은 Service와 Repository에서 수행합니다.
+
+<img width="647" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/f4061e3c-1e46-4679-a49f-da649e1cc6dd">
+
+### 3.4.2. MVC 패턴 적용
+
+서블릿을 컨트롤러로 사용하고, JSP를 뷰로 사용해서 MVC 패턴을 적용해보도록 하겠습니다.
+이 때, 모델은 HttpServletRequest를 사용할 계획입니다. HttpServletRequest 객체 내부에는 데이터 저장소를 가지고 있으며, `setAttribute()`와 `getAttribute()`를 사용하면 데이터를 보관하고 조회할 수 있습니다.
+
+#### 3.4.2.1. 회원 등록
+
+먼저 회원 등록 폼에 대한 컨트롤러를 생성해보겠습니다.
+
+```java
+@WebServlet(name = "mvcMemberFormServlet", urlPatterns = "/servlet-mvc/members/new-form")
+public class MvcMemberFormServlet extends HttpServlet {
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String viewPath = "/WEB-INF/views/new-form.jsp";
+        RequestDispatcher dispatcher = request.getRequestDispatcher(viewPath);
+        dispatcher.forward(request, response);
+    }
+}
+```
+
+`dispatcher.forward()`은 다른 서블릿이나 JSP로 이동할 수 있는 기능이며, 서버 내부에서 호출이 발생합니다. 참고로, `forward`는 서버 내부에서 일어나는 호출이기 때문에 **클라이언트가 전혀 인지를 하지 못합니다.** 반면, `redirect`는 클라이언트에 응답이 나갔다가 클라이언트가 redirect 경로로 다시 요청하는 것이기에, 클라이언트에서 인지할 수 있으며 URL 경로도 변경됩니다.
+
+또한, `forward`하기 위해 설정한 뷰 경로인 `WEB-INF`에 위치한 JSP는 외부에서 직접 호출을 할 수 없습니다. 오직 서버에서만 호출이 가능합니다.
+
+<img width="503" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/e6010d37-e287-4c1d-87ae-13f93426c851">
+
+컨트롤러를 통해 forward 된 뷰 코드는 다음과 같이 작성합니다. 이 때, `action`을 상대 경로로 설정합니다. 그러면 현재 URL이 속한 계층 경로(`/servlet-mvc/members/`)에 `save`가 추가(`/servlet-mvc/members/save`)됩니다.
+
+```html
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!-- action은 상대경로 사용, [현재 URL이 속한 계층 경로 + /save] -->
+<form action="save" method="post">
+    username: <input type="text" name="username" />
+    age: <input type="text" name="age" />
+    <button type="submit">전송</button>
+</form>
+</body>
+</html>
+```
+
+이렇게 설정한 다음 실행해보면 다음과 같이 정상적으로 호출되는 것을 확인할 수 있습니다.
+
+<img width="475" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/e5727131-5657-43c3-ac22-386a8bac889a">
+
+#### 3.4.2.2. 회원 저장
+
+그 다음으로 회원이 저장되기 위해 호출되는 컨트롤러를 생성해보겠습니다.
+
+```java
+@WebServlet(name = "mvcMemberSaveServlet", urlPatterns = "/servlet-mvc/members/save")
+public class MvcMemberSaveServlet extends HttpServlet {
+
+    private MemberRepository memberRepository = MemberRepository.getInstance();
+
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String username = request.getParameter("username");
+        int age = Integer.parseInt(request.getParameter("age"));
+
+        Member member = new Member(username, age);
+        memberRepository.save(member);
+
+        request.setAttribute("member", member);
+
+        String viewPath = "/WEB-INF/views/save-result.jsp";
+        RequestDispatcher dispatcher = request.getRequestDispatcher(viewPath);
+        dispatcher.forward(request, response);
+    }
+}
+```
+
+이전에 설명했듯 `HttpServletRequest`를 모델로 사용하며, `HttpServletRequest`에서 제공하는 `setAttribute()`를 통해 request 객체에 데이터를 보관하여 뷰로 전달했습니다.
+
+뷰는 `request.getAttribute()`를 사용해서 데이터를 꺼내면 됩니다. 그렇지만 `<%= request.getAttribute("member") %>`로 모델에 저장한 member 객체를 꺼내면 너무 복잡해집니다. 그렇기에 JSP에서 제공하는 `${}` 문법을 사용하여 조금 더 편리하게 member 객체를 꺼내도록 구현하였습니다.
+
+```html
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body> 성공
+<ul>
+    <li>id=${member.id}</li>
+    <li>username=${member.username}</li>
+    <li>age=${member.age}</li>
+</ul>
+<a href="/index.html">메인</a>
+</body>
+</html>
+```
+
+#### 3.4.2.3. 회원 목록 조회
+
+마지막으로 저장된 회원에 대한 목록을 조회하는 기능을 구현해보겠습니다. 먼저 컨트롤러를 생성합니다.
+
+```java
+@WebServlet(name = "mvcMemberListServlet", urlPatterns = "/servlet-mvc/members")
+public class MvcMemberListServlet extends HttpServlet {
+    private MemberRepository memberRepository = MemberRepository.getInstance();
+
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        List<Member> members = memberRepository.findAll();
+
+        request.setAttribute("members", members);
+
+        String viewPath = "/WEB-INF/views/members.jsp";
+        RequestDispatcher dispatcher = request.getRequestDispatcher(viewPath);
+        dispatcher.forward(request, response);
+    }
+}
+```
+
+그 다음 회원 목록 조회에 대한 뷰 코드를 작성해보도록 하겠습니다. 이 때, 모델에 담아둔 members를 JSP가 제공하는 `taglib` 기능을 사용하여 출력하도록 하겠습니다.
+
+상단에 다음과 같은 문장을 추가하면 `taglib` 기능을 사용할 수 있습니다.
+
+```html
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+```
+
+`taglib`을 사용하기 전에는 members를 다음과 같이 가져와야 했습니다.
+
+```html
+<%
+      for (Member member : members) {
+          out.write("    <tr>");
+          out.write("        <td>" + member.getId() + "</td>");
+          out.write("        <td>" + member.getUsername() + "</td>");
+          out.write("        <td>" + member.getAge() + "</td>");
+          out.write("    </tr>");
+      }
+%>
+```
+
+그러나 `taglib`을 사용하면 아주 간결하게 데이터를 불러와 사용할 수 있습니다.
+
+```html
+<c:forEach var="item" items="${members}">
+  <tr>
+    <td>${item.id}</td>
+    <td>${item.username}</td>
+    <td>${item.age}</td>
+  </tr>
+</c:forEach>
+```
+
+여기서는 전체 뷰 코드를 생략하도록 하겠습니다. 이전에 작성한 `members.jsp`와 유사하기 때문입니다.
+
+### 3.4.3. MVC 패턴 한계
+
+MVC 패턴을 적용한 덕분에 컨트롤러의 역할과 뷰를 렌더링하는 역할을 명확하게 구분할 수 있게 되었습니다. 특히 뷰는 화면을 그리는 역할에 충실하기 때문에 코드가 깔끔하고 직관적입니다. 그러나 컨트롤러는 다음과 같은 단점들이 존재합니다.
+
+- 포워드 중복 : View로 이동하는 코드가 항상 중복 호출되어야 함
+  
+  ```java
+  RequestDispatcher dispatcher = request.getRequestDispatcher(viewPath);
+  dispatcher.forward(request, response);
+  ```
+
+- ViewPath 중복 : `/WEB-INF/views`로 시작하고 `.jsp`로 끝남.
+
+  ```java
+  String viewPath = "/WEB-INF/views/new-form.jsp"
+  ```
+  
+  추가적인 문제로는, jsp에서 thymeleaf와 같은 다른 뷰로 변경하려는 경우 전체 코드 수정이 필요함
+  
+- 사용하지 않는 코드 존재 : response는 현재 코드에서 사용되고 있지 않음
+- 공통 처리 어려움
+
+기능이 복잡해질수록 컨트롤러에서 공통으로 처리해야 하는 부분이 점점 더 많이 증가할 것입니다. 물론 공통 기능을 메서드로 뽑을 수도 있습니다. 그러나 결과적으로는 해당 메서드를 항상 호출해야 하며, 실수로 호출하지 않는 경우 문제가 될 수 있습니다. 또한 호출 자체도 중복이 되게 됩니다.
+
+이러한 문제를 해결하기 위해 컨트롤러 호출 전 공통 기능을 처리해야 합니다. 이러한 역할을 **프론트 컨트롤러(Front Controller) 패턴** 을 도입하면, 문제를 깔끔하게 해결할 수있습니다.
 
 > 본 게시글은 [스프링 MVC 1편 - 백엔드 웹 개발 핵심 기술](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81-mvc-1) 강의를 참고하여 작성되었습니다.
 >
