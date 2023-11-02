@@ -560,6 +560,37 @@ GET kibana_sample_data_flights/_search
 
 이 중 `Configured GeoJson`과 `Configured Tile Map Service`는 키바나 설정 파일인 `kibana.yml`을 수정해야 보이는 메뉴입니다.
 
+### 8.6.1. Clusters and grids
+
+`Kibana > Maps`에서 `Create map` 버튼을 클릭하여 새로운 지도를 생성합니다.
+그 다음 `Add layer`를 클릭하고 여러 메뉴 중 `Clusters and grids`를 선택합니다.
+그리고 아래와 같이 설정한 다음 `Add layer`를 클릭합니다.
+
+<img width="649" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/c6222378-38c4-479d-96f5-97199a3bd418">
+
+그러면 다음과 같이 세부 설정을 할 수 있는 화면이 보입니다.
+
+<img width="746" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/7231d9e5-9fae-4b70-bd66-3fef64d4b4e8">
+
+`Name`을 통해 Layer 이름을 설정할 수 있으며, `Metrics`에서 카운트/최소/최대/평균 같은 매트릭 집계를 구할 수도 있습니다.
+그리고 `Grid parameters`에서는 정확도를 설정할 수 있습니다.
+여기서는 기본 설정을 유지한 채, `Name`만 `cluster`로 설정하여 생성했습니다.
+
+`grid`로 생성할 때도 동일한 방식으로 진행하면 다음과 같이 클러스터와 그리드가 생성된 것을 확인할 수 있습니다.
+그러면 다음과 같이 타일이 불러와 표출된 것을 확인할 수 있습니다.
+
+<img width="743" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/26afeebb-44d9-43d2-9571-db93ee1ed1b8">
+
+### 8.6.2. 타일맵 서비스
+
+타일맵 서비스는 레이어를 등록하는 시점에 URL을 설정하는 것입니다.
+타일맵은 지도 이미지를 타일 형태로 저장하고 요청이 올 때 타일 형태로 제공하는 구조로, HTTP API 형태로 사용하기 쉽게 제공됩니다.
+`Add Layer`에서 `Tile Map Service`를 선택하고 `URL`에 `https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}` 를 입력합니다.
+
+<img width="1169" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/faa09bf1-210c-41a8-ad94-7feb69906997">
+
+진행하는 과정에서 `Configured GeoJson`과 `Configured Tile Map Service`, `GeoJSON`은 생략하였습니다.
+내용이 궁금하시다면 책을 보시거나 ElasticSearch Document를 참고하시길 바랍니다.
 
 > 본 게시글은 [엘라스틱 스택 개발부터 운영까지](https://product.kyobobook.co.kr/detail/S000001932755) 도서를 참고하여 작성되었습니다.
 >
