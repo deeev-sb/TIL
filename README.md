@@ -50,7 +50,7 @@
 
 ✅ [Pipeline-to-Pipeline Communication](docs/elastic-stack-posting/009.Pipeline-to-Pipeline_Communication.md)
 
-⬜️ [ElastAlert2 설정하기](docs/elastic-stack-posting/010.Set_ElastAlert2.md)
+✅️ [ElastAlert2 설정하기](docs/elastic-stack-posting/010.Set_ElastAlert2.md)
 
 ✅ [Join Field Type](docs/elastic-stack-posting/011.Join_Field_Type.md)
 
