@@ -23,7 +23,7 @@
 
 스프링 배치를 사용하기 위해서는 `@EnableBatchProcessing` 어노테이션을 추가해야 합니다.
 
-```java
+```java{2}
 @SpringBootApplication
 @EnableBatchProcessing
 public class SpringBatchApplication {
@@ -38,23 +38,15 @@ public class SpringBatchApplication {
 `@EnableBatchProcessing` 어노테이션이 선언되면 스프링 배치와 관련된 설정 클래스를 실행시키며, 스프링 배치의 모든 초기화 및 실행 구성이 이루어집니다.
 그리고 스프링 부트 배치의 자동 설정 클래스가 실행되며, 빈으로 등록된 모든 Job을 검색하여 초기화 및 Job 수행을 동시에 하도록 구성되어 있습니다.
 
-좀 더 자세히 알아보겠습니다. `@EnableBatchProcessing` 어노테이션 내부를 보면, `BatchConfigurationSelector` 클래스가 Import 되어 있는 것을 확인할 수 있습니다.
+좀 더 자세히 알아보겠습니다. `@EnableBatchProcessing` 어노테이션 내부를 보면 `BatchConfigurationSelector` 클래스가 Import 되어 있는 것을 확인할 수 있습니다.
 
-```java
+```java{4}
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Import(BatchConfigurationSelector.class)
 public @interface EnableBatchProcessing {
 
-	/**
-	 * Indicate whether the configuration is going to be modularized into multiple application contexts. If true then
-	 * you should not create any &#64;Bean Job definitions in this context, but rather supply them in separate (child)
-	 * contexts through an {@link ApplicationContextFactory}.
-	 *
-	 * @return boolean indicating whether the configuration is going to be
-	 * modularized into multiple application contexts.  Defaults to false.
-	 */
 	boolean modular() default false;
 
 }
@@ -62,7 +54,7 @@ public @interface EnableBatchProcessing {
 
 `BatchConfigurationSelector` 클래스는 `modular` 설정을 따로 하지 않으면, `SimpleBatchConfiguration` 클래스를 가장 먼저 설정합니다.
 
-```java
+```java{17}
 public class BatchConfigurationSelector implements ImportSelector {
 
 	@Override
@@ -87,16 +79,16 @@ public class BatchConfigurationSelector implements ImportSelector {
 }
 ```
 
-`SimpleBatchConfiguration`는 
+`SimpleBatchConfiguration`는 배치 초기화 설정 클래스입니다. `SimpleBatchConfiguration` 외에 또 어떤 클래스들이 있는지 살펴보도록 하겠습니다.
 
 
 ### 2.1.3. 스프링 배치 초기화 설정 클래스
 
-스프링 배치와 관련된 설정 클래스는 `BatchAutoConfiguration`, `SimpleBatchConfiguration`, `BasicBatchConfigurer`, `JpaBatchConfigurer`로 총 네 가지입니다.
+스프링 배치 초기화 설정 클래스는 `BatchAutoConfiguration`, `SimpleBatchConfiguration`, `BasicBatchConfigurer`, `JpaBatchConfigurer`로 총 네 가지입니다.
 
 `BatchAutoConfiguration`은 스프링 배치가 초기화될 때 자동으로 실행되는 설정 클래스입니다. 이 클래스 내에는 Job을 수행하는 `JobLauncherApplicationRunner` 클래스가 포함되어 있으며, `JobLauncherApplicationRunner`는 Bean으로 생성됩니다.
 
-```java
+```java{13}
 @AutoConfiguration(after = HibernateJpaAutoConfiguration.class)
 @ConditionalOnClass({ JobLauncher.class, DataSource.class })
 @ConditionalOnBean(JobLauncher.class)
@@ -129,7 +121,37 @@ public class JobLauncherApplicationRunner implements ApplicationRunner, Initiali
 }
 ```
 
-`SimpleBatchConfiguration`은 `JobBuilderFactory`와 `StepBuilderFactory`를 생성합니다.
+`SimpleBatchConfiguration`은 `AbstractBatchConfiguration` 추상 클래스를 상속 받습니다.
+
+```java{2}
+@Configuration(proxyBeanMethods = false)
+public class SimpleBatchConfiguration extends AbstractBatchConfiguration {
+    // ..
+}
+```
+
+`AbstractBatchConfiguration` 추상 클래스는 `JobBuilderFactory`와 `StepBuilderFactory`를 생성합니다.
+
+```
+@Configuration(proxyBeanMethods = false)
+@Import(ScopeConfiguration.class)
+public abstract class AbstractBatchConfiguration implements ImportAware, InitializingBean {
+
+	@Autowired(required = false)
+	private DataSource dataSource;
+
+	private BatchConfigurer configurer;
+
+	private JobRegistry jobRegistry = new MapJobRegistry();
+
+	private JobBuilderFactory jobBuilderFactory;
+
+	private StepBuilderFactory stepBuilderFactory;
+
+    // ...
+}
+```
+
 
 
 
