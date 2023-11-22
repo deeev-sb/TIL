@@ -81,12 +81,11 @@ public class BatchConfigurationSelector implements ImportSelector {
 
 `SimpleBatchConfiguration`는 배치 초기화 설정 클래스입니다. `SimpleBatchConfiguration` 외에 또 어떤 클래스들이 있는지 살펴보도록 하겠습니다.
 
-
 ### 2.1.3. 스프링 배치 초기화 설정 클래스
 
 스프링 배치 초기화 설정 클래스는 `SimpleBatchConfiguration`, `BasicBatchConfigurer`, `JpaBatchConfigurer`, `BatchAutoConfiguration`로 총 네 가지입니다. 스프링 배치 초기화 실행 순서는 아래와 같습니다.
 
-![image](https://github.com/Kim-SuBin/spring-batch/assets/46712693/dea0ba22-be09-4832-acd4-b27c09caf575)
+<img width="140" src="https://github.com/Kim-SuBin/TIL/assets/46712693/ba70b680-bcfa-4ced-8014-b376104d3753" alt="image">
 
 ### 2.1.3.1. SimpleBatchConfiguration
 
@@ -339,9 +338,9 @@ Step 객체는 다음과 같은 방식으로 구현하며, Job 객체와 유사�
 
 ```java
 public class HelloJobConfiguration {
-	
+
     // ...
-	
+
 	@Bean
     public Step helloStep1() {
         return stepBuilderFactory.get("helloStep1")
@@ -389,45 +388,45 @@ public class HelloJobConfiguration {
 그리고 Job 내에는 여러 Step이 존재할 수 있으며, Step 내에는 단 하나의 Tasklet만 존재할 수 있습니다.
 만약 Step 내에 여러 개의 Tasklet을 생성하면 마지막 Tasklet만 동작합니다.
 
-![image](https://github.com/Kim-SuBin/spring-batch/assets/46712693/d9ecd546-3ea5-468c-988a-bdf1d9629464)
-
-
+<img width="500" src="https://github.com/Kim-SuBin/TIL/assets/46712693/c78f56b5-d95a-4dfc-81f3-4d0502dc46b5" alt="image">
 
 ## 2.3. DB 스키마 생성 및 이해
 
+스프링 배치는 실행 및 관리를 위한 목적으로 여러 도메인(Job, Step, JobParameters, ...)의 정보들을 저장 및 업데이트하고 조회할 수 있는 스키마를 제공합니다.
+과거, 현재의 실행에 대한 세세한 정보, 실행에 대한 성공과 실패 여부 등과 같은 **스프링 배치 메타 데이터**를 관리할 수 있어 리스크 발생 시 빠른 대처가 가능합니다.
+그리고 DB와 연동을 하면 필수적으로 메타 테이블이 생성되어야 합니다.
+어떤 DB에 대한 스키마를 제공하는지는 `/org/springframework/batch/core/schema-*.sql`을 확인하면 됩니다.
 
+<img width="247" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/8ce75b69-7866-4ef1-9ff3-955be1677c21">
 
+### 2.3.1. 스키마 생성 설정
 
+스키마를 생성하는 방법은 수동 생성과 자동 생성이 있습니다.
+**수동 생성**은 쿼리를 복사한 다음 직접 실행하는 것입니다.
+그리고 **자동 생성**은 `spring.batch.jdbc.initialize-schema` 설정을 properties에 추가하면 됩니다.
+자동 생성은 다음과 같이 세 가지 속성을 가집니다.
 
+1. ALWAYS
+   - 스크립트를 항상 실행
+   - RDBMS 설정이 되어 있을 경우 내장 DB보다 우선적으로 실행
+2. EMBEDDED : 내장 DB일 때만 실행되며 스키마가 자동 생성됨. (default)
+3. NEVER
+   - 스크립트를 항상 실행 안함
+   - 내장 DB일 경우 스크립트가 생성이 안되기 때문에 오류 발생
 
+운영 환경에서는 속성을 NEVER로 설정한 다음, 수동으로 스크립트를 생성하는 것을 권장합니다.
 
+### 2.3.2. DB 스키마
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<img src="https://docs.spring.io/spring-batch/docs/3.0.x/reference/html/images/meta-data-erd.png" alt="image">
 
 > 본 게시글은 [스프링 배치 - Spring Boot 기반으로 개발하는 Spring Batch](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81-%EB%B0%B0%EC%B9%98) 강의를 참고하여 작성되었습니다.
 >
 > 상세한 내용이 궁금하시다면 강의 수강을 추천해 드립니다.
 
 **추가로 참고한 내용**
-- <https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/ApplicationRunner.html>
+
+- <https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/ApplicationRunner.html
 - <https://mangkyu.tistory.com/233>
 - <https://zzang9ha.tistory.com/424>
+- <https://docs.spring.io/spring-batch/docs/3.0.x/reference/html/metaDataSchema.html
