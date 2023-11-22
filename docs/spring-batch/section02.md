@@ -84,7 +84,121 @@ public class BatchConfigurationSelector implements ImportSelector {
 
 ### 2.1.3. 스프링 배치 초기화 설정 클래스
 
-스프링 배치 초기화 설정 클래스는 `BatchAutoConfiguration`, `SimpleBatchConfiguration`, `BasicBatchConfigurer`, `JpaBatchConfigurer`로 총 네 가지입니다.
+스프링 배치 초기화 설정 클래스는 `SimpleBatchConfiguration`, `BasicBatchConfigurer`, `JpaBatchConfigurer`, `BatchAutoConfiguration`로 총 네 가지입니다. 스프링 배치 초기화 실행 순서는 아래와 같습니다.
+
+![image](https://github.com/Kim-SuBin/spring-batch/assets/46712693/dea0ba22-be09-4832-acd4-b27c09caf575)
+
+### 2.1.3.1. SimpleBatchConfiguration
+
+`SimpleBatchConfiguration` 클래스는 `AbstractBatchConfiguration` 추상 클래스를 상속 받습니다.
+
+```java{2}
+@Configuration(proxyBeanMethods = false)
+public class SimpleBatchConfiguration extends AbstractBatchConfiguration {
+    // ..
+}
+```
+
+`AbstractBatchConfiguration` 추상 클래스는 `JobBuilderFactory`와 `StepBuilderFactory`를 생성합니다.
+
+```
+@Configuration(proxyBeanMethods = false)
+@Import(ScopeConfiguration.class)
+public abstract class AbstractBatchConfiguration implements ImportAware, InitializingBean {
+
+	@Autowired(required = false)
+	private DataSource dataSource;
+
+	private BatchConfigurer configurer;
+
+	private JobRegistry jobRegistry = new MapJobRegistry();
+
+	private JobBuilderFactory jobBuilderFactory;
+
+	private StepBuilderFactory stepBuilderFactory;
+
+    // ...
+}
+```
+
+그리고 `SimpleBatchConfiguration` 클래스는 `createLazyProxy()` 메서드를 통해 알 수 있듯 스프링 배치의 주요 구성 요소를 프록시 객체로 생성합니다.
+
+```java
+@Configuration(proxyBeanMethods = false)
+public class SimpleBatchConfiguration extends AbstractBatchConfiguration {
+
+	// ...
+
+	private <T> T createLazyProxy(AtomicReference<T> reference, Class<T> type) {
+		ProxyFactory factory = new ProxyFactory();
+		factory.setTargetSource(new ReferenceTargetSource<>(reference));
+		factory.addAdvice(new PassthruAdvice());
+		factory.setInterfaces(new Class<?>[] { type });
+		@SuppressWarnings("unchecked")
+		T proxy = (T) factory.getProxy();
+		return proxy;
+	}
+}
+```
+
+### 2.1.3.2. BasicBatchConfigurer 및 JpaBatchConfigurer
+
+`BatchConfigurerConfiguration` 내에 `BasicBatchConfigurer` 클래스와 `JpaBatchConfigurer` 클래스가 존재합니다.
+
+```java
+@ConditionalOnClass(PlatformTransactionManager.class)
+@ConditionalOnBean(DataSource.class)
+@ConditionalOnMissingBean(BatchConfigurer.class)
+@Configuration(proxyBeanMethods = false)
+class BatchConfigurerConfiguration {
+
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnMissingBean(name = "entityManagerFactory")
+	static class JdbcBatchConfiguration {
+
+		@Bean
+		BasicBatchConfigurer batchConfigurer(BatchProperties properties, DataSource dataSource,
+				@BatchDataSource ObjectProvider<DataSource> batchDataSource,
+				ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
+			return new BasicBatchConfigurer(properties, batchDataSource.getIfAvailable(() -> dataSource),
+					transactionManagerCustomizers.getIfAvailable());
+		}
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnClass(EntityManagerFactory.class)
+	@ConditionalOnBean(name = "entityManagerFactory")
+	static class JpaBatchConfiguration {
+
+		@Bean
+		JpaBatchConfigurer batchConfigurer(BatchProperties properties, DataSource dataSource,
+				@BatchDataSource ObjectProvider<DataSource> batchDataSource,
+				ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers,
+				EntityManagerFactory entityManagerFactory) {
+			return new JpaBatchConfigurer(properties, batchDataSource.getIfAvailable(() -> dataSource),
+					transactionManagerCustomizers.getIfAvailable(), entityManagerFactory);
+		}
+
+	}
+
+}
+```
+
+`BasicBatchConfigurer` 클래스는 `SimpleBatchConfiguration` 클래스에서 생성한 프록시 객체의 실제 대상 객체를 생성하는 설정 클래스입니다.
+`BasicBatchConfigurer` 클래스를 빈으로 의존성 주입을 받아서 주요 객체들을 참조해 사용할 수 있습니다.
+
+`JpaBatchConfigurer` 클래스는 JPA 관련 객체를 생성하는 설정 클래스이며, `BasicBatchConfigurer` 상속 받아 구현되었습니다.
+
+```java
+public class JpaBatchConfigurer extends BasicBatchConfigurer {
+	// ...
+}
+```
+
+`BasicBatchConfigurer` 클래스와 `JpaBatchConfigurer` 클래스는 `BatchConfigurer` 인터페이스를 구현한 것입니다. 즉, `BatchConfigurer` 인터페이스를 사용자 정의 클래스로 구현하여 사용할 수도 있다는 의미입니다.
+
+### 2.1.3.3. BatchAutoConfiguration
 
 `BatchAutoConfiguration`은 스프링 배치가 초기화될 때 자동으로 실행되는 설정 클래스입니다. 이 클래스 내에는 Job을 수행하는 `JobLauncherApplicationRunner` 클래스가 포함되어 있으며, `JobLauncherApplicationRunner`는 Bean으로 생성됩니다.
 
@@ -121,70 +235,165 @@ public class JobLauncherApplicationRunner implements ApplicationRunner, Initiali
 }
 ```
 
-`SimpleBatchConfiguration`은 `AbstractBatchConfiguration` 추상 클래스를 상속 받습니다.
-
-```java{2}
-@Configuration(proxyBeanMethods = false)
-public class SimpleBatchConfiguration extends AbstractBatchConfiguration {
-    // ..
-}
-```
-
-`AbstractBatchConfiguration` 추상 클래스는 `JobBuilderFactory`와 `StepBuilderFactory`를 생성합니다.
-
-```
-@Configuration(proxyBeanMethods = false)
-@Import(ScopeConfiguration.class)
-public abstract class AbstractBatchConfiguration implements ImportAware, InitializingBean {
-
-	@Autowired(required = false)
-	private DataSource dataSource;
-
-	private BatchConfigurer configurer;
-
-	private JobRegistry jobRegistry = new MapJobRegistry();
-
-	private JobBuilderFactory jobBuilderFactory;
-
-	private StepBuilderFactory stepBuilderFactory;
-
-    // ...
-}
-```
-
-
-
-
-`BatchConfigurerConfiguration` 내에 `BasicBatchConfigurer` 클래스와 `JpaBatchConfigurer` 클래스가 존재합니다.
-
-
-
-
 ## 2.2. Hello Spring Batch 시작하기
 
+이번에는 코드를 통해 Spring Batch Job을 실제로 어떻게 구현하는지에 대해 살펴보도록 하겠습니다.
+
+```java
+@RequiredArgsConstructor
+@Configuration
+public class HelloJobConfiguration {
+
+    private final JobBuilderFactory jobBuilderFactory;
+    private final StepBuilderFactory stepBuilderFactory;
+
+    @Bean
+    public Job helloJob() {
+        return jobBuilderFactory.get("helloJob")
+                .start(helloStep1())
+                .next(helloStep2())
+                .build();
+    }
+
+    @Bean
+    public Step helloStep1() {
+        return stepBuilderFactory.get("helloStep1")
+                .tasklet(new Tasklet() {
+                    @Override
+                    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+                        System.out.println("=====================");
+                        System.out.println(">> Hello Spring Batch!!!");
+                        System.out.println("=====================");
+
+                        return RepeatStatus.FINISHED;
+                    }
+                })
+                .build();
+    }
+
+
+    @Bean
+    public Step helloStep2() {
+        return stepBuilderFactory.get("helloStep2")
+                .tasklet(new Tasklet() {
+                    @Override
+                    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+
+                        System.out.println("=====================");
+                        System.out.println(">> Start Step2!!!");
+                        System.out.println(">> ==================");
+
+                        return RepeatStatus.FINISHED; // 한 번만 실행 후 종료 라는 의미. 설정 하지 않으면 Task를 무한 반복함.
+                    }
+                })
+                .build();
+    }
+}
+```
+
+코드를 하나씩 뜯어서 살펴보도록 하겠습니다.
+
+`@Configuration` 애노테이션을 선언하면 하나의 배치 Job을 정의하고 빈으로 설정합니다.
+
+```java
+@Configuration
+public class HelloJobConfiguration {
+	// ...
+}
+```
+
+`JobBuilderFactory` `StepBuilderFactory`를 Lombok과 final을 사용해 생성자 주입으로 의존성을 추가한 것을 확인할 수 있습니다. 이 두 가지는 스프링 배치에서 Job을 쉽게 구성할 수 있도록 제공하는 유틸입니다. `JobBuilderFactory`는 Job을 생성하는 빌더 팩토리이고, `StepBuilderFactory`는 Step을 생성하는 빌더 팩토리입니다.
+
+```java
+@RequiredArgsConstructor
+@Configuration
+public class HelloJobConfiguration {
+
+    private final JobBuilderFactory jobBuilderFactory;
+    private final StepBuilderFactory stepBuilderFactory;
+
+	// ...
+}
+```
+
+Job 객체는 다음과 같은 방식으로 생성합니다. `jobBuilderFactory.get()`에는 생성할 Job 이름을 추가합니다. `start`와 `next`에는 인자로 step 객체를 넣고 있으며, `start`, `next`는 step을 실행하는 순서입니다.
+
+```java
+public class HelloJobConfiguration {
+
+    // ...
+
+    @Bean
+    public Job helloJob() {
+        return jobBuilderFactory.get("helloJob")
+                .start(helloStep1())
+                .next(helloStep2())
+                .build();
+    }
+
+	// ...
+}
+```
+
+Step 객체는 다음과 같은 방식으로 구현하며, Job 객체와 유사하게 `stepBuilderFactory.get()`에 Step 이름을 설정합니다. 그 다음 `tasklet()`에 실제로 작업할 내용을 작성합니다. 이 때, `RepeatStatus.FINISHED`를 `return`하여 작업이 단 한 번만 수행되도록 설정합니다. 이렇게 하지 않으면 `tasklet()`은 무한 반복합니다.
+
+```java
+public class HelloJobConfiguration {
+	
+    // ...
+	
+	@Bean
+    public Step helloStep1() {
+        return stepBuilderFactory.get("helloStep1")
+                .tasklet(new Tasklet() {
+                    @Override
+                    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+                        System.out.println("=====================");
+                        System.out.println(">> Hello Spring Batch!!!");
+                        System.out.println("=====================");
+
+                        return RepeatStatus.FINISHED;
+                    }
+                })
+                .build();
+    }
+	// ...
+}
+```
+
+`tasklet()`은 기본적으로 익명 내부 클래스로 작성이 되는데, 이를 좀 더 간결하게 람다 표현식을 사용해 작성할 수도 있습니다.
+
+```java
+public class HelloJobConfiguration {
+
+    // ...
+
+    @Bean
+    public Step helloStep1() {
+        return stepBuilderFactory.get("helloStep1")
+                .tasklet((contribution, chunkContext) -> {
+                    System.out.println("=====================");
+                    System.out.println(">> Hello Spring Batch!!!");
+                    System.out.println("=====================");
+
+                    return RepeatStatus.FINISHED;
+                })
+                .build();
+    }
+
+	// ...
+}
+```
+
+정리하면 Job은 다음과 같은 구조로 이루어져 있으며, **Job 구동 → Step 실행 → Tasklet 실행** 순서로 Job이 실행됩니다.
+그리고 Job 내에는 여러 Step이 존재할 수 있으며, Step 내에는 단 하나의 Tasklet만 존재할 수 있습니다.
+만약 Step 내에 여러 개의 Tasklet을 생성하면 마지막 Tasklet만 동작합니다.
+
+![image](https://github.com/Kim-SuBin/spring-batch/assets/46712693/d9ecd546-3ea5-468c-988a-bdf1d9629464)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## DB 스키마 생성 및 이해
-
+## 2.3. DB 스키마 생성 및 이해
 
 
 
