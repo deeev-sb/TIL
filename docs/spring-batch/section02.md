@@ -414,7 +414,7 @@ public class HelloJobConfiguration {
    - 스크립트를 항상 실행 안함
    - 내장 DB일 경우 스크립트가 생성이 안되기 때문에 오류 발생
 
-운영 환경에서는 속성을 NEVER로 설정한 다음, 수동으로 스크립트를 생성하는 것을 권장합니다.
+**운영 환경에서는 속성을 NEVER로 설정한 다음, 수동으로 스크립트를 생성하는 것을 권장합니다.**
 
 ### 2.3.2. DB 스키마
 
@@ -424,17 +424,78 @@ public class HelloJobConfiguration {
 
 `BATCH_JOB_INSTANCE`, `BATCH_JOB_EXCUTION`, `BATCH_JOB_EXECUTION_PARAMS`, `BATCH_JOB_EXECUTION_CONTEXT`는 Job과 관련된 스키마이고, `BATCH_STEP_EXECUTION`, `BATCH_STEP_EXECUTION_CONTEXT`는 Step과 관련된 스키마입니다.
 
+### 2.3.3 DB 스키마 수동 생성
 
+제공된 스프링 배치 메타 데이터를 바탕으로 직접 MYSQL 설정을 해보도록 하겠습니다.
+먼저, intellij에서 mysql을 연결합니다.
 
+<img width="794" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/9c8fa2ff-ceee-4bd6-bfdb-d68af3826a35">
 
+그 다음 생성된 DB에 우클릭을 하고 `New > Schema`를 통해 스키마 생성 팝업으로 이동합니다.
 
+<img width="560" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/16ae0d37-5f80-42ef-a906-384712105c26">
 
+그리고 원하는 이름으로 스키마를 생성합니다. 여기서는 springbatch라고 설정하였습니다.
 
+<img width="329" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/b2e338f7-574b-4971-b24e-9a412e810e42">
 
+이제 테이블을 생성하도록 하겠습니다. 테이블은 스프링 배치 메타 데이터를 그대로 복사해서 사용하면 됩니다. `schema-mysql.sql`에 있는 모든 내용을 복사해서 DB 콘솔에 붙여넣습니다.
 
+<img width="635" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/9a289221-fcf5-4a30-95e9-d4c861fb6649">
 
+전체 쿼리를 실행하면 스키마 내에 테이블이 생성되는 것을 확인할 수 있습니다.
 
+<img width="373" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/2242f0ba-78eb-408a-8423-7eb852d382ea">
 
+### 2.3.4 DB 스키마 자동 생성
+
+자동 실행하기 위해서는 `application` 설정 파일 작성이 필요합니다. h2와 mysql에 대한 설정을 모두 작성하였습니다.
+참고로 h2는 내장되어 있는 DB를 사용할 것이기 때문에 자동/수동 생성할 필요가 없이 내장되어 있는 DB를 사용하면 되므로, `embedded`라고 설정하였습니다.
+
+```yaml
+spring:
+  profiles:
+    active: local
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    hikari:
+      jdbc-url: jdc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+      username: sa
+      password:
+      driver-class-name: org.h2.Driver
+  batch:
+    jdbc:
+      initialize-schema: embedded
+      
+---
+spring:
+  config:
+    activate:
+      on-profile: mysql
+  datasource:
+    hikari:
+      jdbc-url: jdbc:mysql://localhost:3306/springbatch?useUnicode=true&characterEncoding=utf8
+      username: root
+      password: root
+      driver-class-name: com.mysql.jdbc.Driver
+  batch:
+    jdbc:
+      initialize-schema: always
+```
+
+설정 파일을 작성했다면 코드를 실행해서 자동으로 테이블이 생성되는지 확인해보도록 하겠습니다.
+먼저 springbatch 스키마에 있던 테이블을 삭제합니다. 그 다음 아래와 같이 애플리케이션 실행 설정을 변경합니다.
+
+<img width="640" alt="image" src="https://github.com/Kim-SuBin/TIL/assets/46712693/7ea28c15-9730-4245-b30e-d66f9fbdf620">
+
+그 다음 실행하면 테이블이 다시 생성되어 있는 것을 확인할 수 있습니다.
+
+이전에도 설명했듯 `initialize-schema: always`는 개발할 때만 사용하는 것을 추천드립니다.
 
 
 
