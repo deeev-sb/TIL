@@ -13,11 +13,11 @@
 - Spring : 2.7.17
 - Dependency
   - Spring Batch
-  - H2 Database
   - Lombok
   - Spring Data JPA
+  - H2 Database
+  - MySQL
 
-강의에서는 MySQL을 사용하고 있는데, 여기서는 H2를 사용하도록 하겠습니다.
 
 ### 2.1.2. 스프링 배치 활성화
 
@@ -418,7 +418,27 @@ public class HelloJobConfiguration {
 
 ### 2.3.2. DB 스키마
 
-<img src="https://docs.spring.io/spring-batch/docs/3.0.x/reference/html/images/meta-data-erd.png" alt="image">
+스프링 배치 메타 데이터를 통해 생성되는 DB 스키마는 다음과 같습니다.
+
+<img width="500" src="https://docs.spring.io/spring-batch/docs/3.0.x/reference/html/images/meta-data-erd.png" alt="image">
+
+`BATCH_JOB_INSTANCE`, `BATCH_JOB_EXCUTION`, `BATCH_JOB_EXECUTION_PARAMS`, `BATCH_JOB_EXECUTION_CONTEXT`는 Job과 관련된 스키마이고, `BATCH_STEP_EXECUTION`, `BATCH_STEP_EXECUTION_CONTEXT`는 Step과 관련된 스키마입니다.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 > 본 게시글은 [스프링 배치 - Spring Boot 기반으로 개발하는 Spring Batch](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81-%EB%B0%B0%EC%B9%98) 강의를 참고하여 작성되었습니다.
 >
