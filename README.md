@@ -71,3 +71,7 @@
 ## Linux
 
 ✅ [terminal capability "cm" required 해결하기](docs/linux-posting/001.terminal_capability_cm_required.md)
+
+## Front-end
+
+⬜️ [손에 익는 Next.js - 공식 문서 훑어보기](docs/friendly-next-js-part1)
