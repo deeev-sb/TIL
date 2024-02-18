@@ -84,6 +84,207 @@
 투표 전용 노드는 마스터 노드가 되지 않기 때문에 마스터 후보 노드보다 부담 없이 운영될 수 있으며,
 마스터 후보 노드들이 대량으로 장애가 발생했을 때 시스템이 멈추지 않고 동작할 수 있게 도와줍니다.
 
+### 13.2.3. 인제스트 노드
+
+
+인제스트 노드는(ingest node)는 **도큐먼트의 가공과 정제를 위한 인제스트 파이프라인이 실행되는 노드**입니다.
+인제스트 노드는 엘라스틱서치에 인덱싱하기 전 **파이프라인을 통해 도큐먼트를 원하는 형태로 변형**할 수 있습니다.
+인제스트 노드만으로 변형이 가능하다고 하여 로그스태시가 필요하지 않는 것은 아닙니다.
+인제스트 노드는 가볍고 간단한 수집 프로세스에서만 활용 가능하며, 좀 더 무겁고 복잡한 가공이 필요하다면 로그 스태시를 사용하는 것이 좋습니다.
+
+인제스트 노드는 다음과 같은 방식으로 동작합니다.
+
+<img width="863" alt="image" src="https://github.com/deeev-sb/TIL/assets/46712693/f3f9eba8-3a93-44d0-b288-66598bd21513">
+
+인제스트 노드에는 프로세서와 파이프라인이라는 구성 요소를 가집니다.
+프로세서는 도큐먼트를 변형할 수 있는 기능적으로 구분되는 모듈이며, 파이프라인은 프로세서의 집합입니다.
+
+#### 13.2.3.1. 파이프라인
+
+인제스트 파이프라인을 생성하는 방법에 대해 알아보도록 하겠습니다.
+엘라스틱서치에서는 파이프라인 생성을 위한 REST API를 제공하는 데, 주요 파라미터는 `description`과 `processors`입니다.
+`description`은 파이프라인에 대한 설명이고, `processors`는 파이프라인이 처리해야 할 프로세서들입니다.
+
+```bash
+PUT _ingest/pipeline/pipelinename
+{
+  "description" : "description",
+  "processors" : [ ... ]
+}
+```
+
+`testpipe`라는 이름의 파이프라인을 다음과 같이 생성해보았습니다.
+
+<img width="300" alt="image" src="https://github.com/deeev-sb/TIL/assets/46712693/21cec9ff-da79-4d01-87ca-d9af65b798ab">
+
+`processors` 내에 있는 `set`은 특정 필드 값을 추가/수정하는 역할을 수행합니다. 
+그리고 `on_failure`는 파이프라인이나 프로세스 처리에 실패했을 때 예외를 처리하는 방법을 입력하며, 적는 위치에 따라 적용 범위도 바뀌게 됩니다.
+
+파이프라인을 적용하는 방법에 대해 살펴보겠습니다.
+
+먼저, **도큐먼트 생성 시** 적용하는 방법입니다. 이 방법은 간단하게, 인덱스 생성 시 끝에 파이프라인에 대한 정보를 기입하면 됩니다.
+
+```bash
+PUT test_index/_doc/1?pipeline=testpipe
+{
+  "name": "id1",
+  "status": "high"
+}
+```
+
+`high`라고 입력한 값이 변경되었는지 조회를 통해 알아봅시다. (`GET test_index/_search`)
+
+<img width="238" alt="image" src="https://github.com/deeev-sb/TIL/assets/46712693/9b1b9211-8c54-4a8c-8620-3be56fbe3bc2">
+
+그러면 파이프라인이 적용되어 입력한 `high`가 아닌 `low`로 값이 변경되어 있는 것을 확인할 수 있습니다.
+
+그 다음으로 도큐먼트를 수정할 때 파이프라인을 적용하는 방법에 대해 알아보겠습니다.
+수정 적용 방법은 **update API에 파이프라인을 적용하는 방법**과 **reindex API에 파이프라인을 적용하는 방법**이 있습니다.
+update API를 사용할 때는 `update_by_query`라는 API를 사용해야 합니다.
+
+우선 API 적용을 위한 인덱스를 생성하겠습니다.
+
+```bash
+PUT test_index2/_doc/1
+{
+  "name": "id1",
+  "status": "low"
+}
+
+PUT test_index2/_doc/2
+{
+  "name": "id2"
+}
+```
+
+그 다음 `update_by_query`를 사용해 파이프라인을 적용해보겠습니다.
+
+```bash
+POST test_index2/_update_by_query?pipeline=testpipe
+```
+
+그 다음 인덱스를 조회해보면, 다음과 같이 파이프라인 설정에 맞게 추가/수정된 것을 확인할 수 있습니다.
+
+<img width="238" alt="image" src="https://github.com/deeev-sb/TIL/assets/46712693/919b3350-b50d-4614-99f3-d3b99fd63282">
+
+update API가 아닌 reindex API를 사용하려면 다음과 같이 요청하면 됩니다.
+reindex API는 기존에 있던 인덱스를 복제해 새로운 index를 생성합니다. 이 때, 새로 생성된 `test_index4`는 `testpipe` 파이프라인의 영향을 받게 됩니다.
+
+```bash
+POST _reindex
+{
+  "source": {
+    "index": "test_index3"
+  },
+  "dest": {
+    "index": "test_index4",
+    "pipeline": "testpipe"
+  }
+}
+```
+
+여기서 `test_index3`는 `test_index2`를 추가할 때와 유사하게 추가하여 생성했습니다.
+
+```bash
+PUT test_index3/_doc/1
+{
+  "name": "id1",
+  "status": "low"
+}
+
+PUT test_index3/_doc/2
+{
+  "name": "id2"
+}
+```
+
+파이프라인 적용 전인 `test_index3`와 적용 후인 `test_index4`를 비교해보면 다음과 같습니다.
+
+|                                                       test_index3                                                        |                                                       test_index4                                                        |
+|:------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------:|
+| <img width="229" alt="image" src="https://github.com/deeev-sb/TIL/assets/46712693/779f7c6a-62c7-4cad-9f67-bf9c2fa6d139"> | <img width="238" alt="image" src="https://github.com/deeev-sb/TIL/assets/46712693/35ab0ecc-8ec9-4d28-8d5e-3d544d5faaa8"> |
+
+수정해야 하는 도큐먼트가 많다면 update API 보다는 reindex API를 사용하는 것이 성능상 유리할 수 있습니다.
+업데이트는 내부적으로 검색, 해당 도큐먼트 삭제, 수정된 도큐먼트로 리인덱싱이라는 순서로 작업이 진행됩니다.
+이 때 삭제된 도큐먼트는 세그먼트 머지가 발생하기 전까지 ID만 내부적으로 기록해뒀따가 검색 시 필터링 하는 방식이어서
+검색 성능에 나쁜 영향을 미칩니다.
+
+마지막으로 **인덱스 설정에서 기본 파이프라인을 적용하는 방법**에 대해 알아보겠습니다.
+
+다음과 같이 인덱스 생성 시 설정(`settings`)로 파이프라인을 설정해두면, 도큐먼트 인덱싱 시 자동으로 적용됩니다.
+
+```bash
+PUT test_index5
+{
+  "settings": {
+    "default_pipeline": "testpipe"
+  }
+}
+```
+
+실제로 적용되는지 확인해보겠습니다.
+
+```bash
+PUT test_index5/_doc/1
+{
+  "name": "id1",
+  "status": "high"
+}
+```
+
+도큐먼트를 생성하고 조회해보면 다음과 같이 값이 변경되어 있는 것을 확인할 수 있습니다.
+
+<img width="227" alt="image" src="https://github.com/deeev-sb/TIL/assets/46712693/c497089b-7e12-4746-b83b-5b236207d502">
+
+#### 13.2.3.2. 프로세서
+
+프로세서는 파이프라인을 구성하는 요소이며, 자주 사용하는 프로세서는 다음과 같습니다.
+- date
+   - 날짜/시간 데이터를 파싱
+   - 다음 예시의 경우 `myfield` 필드에 있는 데이터가 `formats`에 있는 날짜/시간 포맷일 경우 `timestamp`에 날짜 객체 저장
+
+      ```bash
+      {
+        "date": {
+          "field" : "myfield",
+          "target_field" : "timestamp",
+          "formats" : ["dd/MM/yyyy hh:mm:ss"]
+        }
+      } 
+      ```
+
+- drop 
+  - 특정 도큐먼트를 저장하고 싶지 않을 때 사용
+  - 주로 `if` 옵션을 이용해 조건 지정
+
+    ```bash
+    {
+      "drop" : {
+        "if" : "ctx.myfield == 'guest'"
+      }
+    }
+    ```
+
+- grok 
+  - 고수준의 정규식 패턴인 grok을 이용해 특정 필드를 구조화된 필드로 만들 수 있음
+- set 
+  - 특정 필드에 값 지정 
+  - 필드가 이미 있다면 변경하고 없다면 새로 추가
+- split
+  - 필드를 구분 기호를 이용해 분리
+  - 분리된 필드는 배열 형태의 값을 가짐
+
+    ```bash
+    {
+      "field": "myfield",
+      "separator": ","
+    }
+    ```
+
+모든 프로세서에는 `if`, `tag`, `on_failure`라는 공통 파라미터가 존재합니다.
+`if`는 조건문에 사용하며, `tag`는 동작 과정에는 영향이 없지만 프로세서를 쉽게 추적하기 위해 사용합니다.
+그리고 `on_failure`는 문제가 발생했을 때 후속 조치를 위해 사용합니다.
+
 
 > 본 게시글은 [엘라스틱 스택 개발부터 운영까지](https://product.kyobobook.co.kr/detail/S000001932755) 도서를 참고하여 작성되었습니다.
 >
