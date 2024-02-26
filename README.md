@@ -14,11 +14,19 @@
 
 ## Spring
 
+### 김영한의 스프링 완전 정복
+
 ⬜️ [[강의] 스프링 핵심 원리 - 기본편](docs/springBasic)
 
 ✅ [[강의] 모든 개발자를 위한 HTTP 웹 기본 지식](docs/http-web-network)
 
 ⬜️ [[강의] 스프링 MVC 1편 - 백엔드 웹 개발 핵심 기술](docs/spring-mvc1)
+
+### Spring Batch
+
+⬜️ [[강의] 스프링 배치 - Spring Boot 기반으로 개발하는 Spring Batch](docs/spring-batch/)
+
+⬜️ [[책] 스프링 배치 완벽 가이드](docs/spring-batch-perfect-guide/)
 
 ## Elastic Stack
 
@@ -74,4 +82,4 @@
 
 ## Front-end
 
-⬜️ [손에 익는 Next.js - 공식 문서 훑어보기](docs/friendly-next-js-part1)
+✅ [손에 익는 Next.js - 공식 문서 훑어보기](docs/friendly-next-js-part1)
