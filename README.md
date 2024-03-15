@@ -26,7 +26,7 @@
 
 ⬜️ [[강의] 스프링 배치 - Spring Boot 기반으로 개발하는 Spring Batch](docs/spring-batch/)
 
-⬜️ [[책] 스프링 배치 완벽 가이드](docs/spring-batch-perfect-guide/)
+[//]: # (⬜️ [[책] 스프링 배치 완벽 가이드]&#40;docs/spring-batch-perfect-guide/&#41;)
 
 ## Elastic Stack
 
@@ -34,7 +34,7 @@
 
 ✅ [[강의] ELK 스택으로 데이터 분석 - 7.10.2 ver](docs/analyze-data-with-elk-stack)
 
-⬜️ [[책] Elastic Stack 개발부터 운영까지 - 7.10.2 ver](docs/elastic-stack)
+✅ [[책] Elastic Stack 개발부터 운영까지 - 7.10.2 ver](docs/elastic-stack)
 
 ✅ [[강의] Elasticsearch Essential](docs/elasticsearch-essential)
 
@@ -83,3 +83,5 @@
 ## Front-end
 
 ✅ [손에 익는 Next.js - 공식 문서 훑어보기](docs/friendly-next-js-part1)
+
+⬜️ [타입스크립트, 리액트, Next.js로 배우는 실전 웹 애플리케이션](docs/typescript-and-react-and-next-js)
