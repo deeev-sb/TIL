@@ -26,7 +26,11 @@
 
 ⬜️ [[강의] 스프링 배치 - Spring Boot 기반으로 개발하는 Spring Batch](docs/spring-batch/)
 
-[//]: # (⬜️ [[책] 스프링 배치 완벽 가이드]&#40;docs/spring-batch-perfect-guide/&#41;)
+[//]: # (⬜️ [[책] 스프링 배치 완벽 가이드])
+
+### Spring JWT
+
+✅ [[강의] Spring Boot JWT Tutorial](docs/spring-boot-jwt-tutorial)
 
 ## Elastic Stack
 
@@ -85,3 +89,8 @@
 ✅ [손에 익는 Next.js - 공식 문서 훑어보기](docs/friendly-next-js-part1)
 
 ⬜️ [타입스크립트, 리액트, Next.js로 배우는 실전 웹 애플리케이션](docs/typescript-and-react-and-next-js)
+
+## Session
+
+✅ [Elastic. 옵저버빌리티 - APM 기능 소개](docs/session/240227.end_to_end_observability_with_elastic_apm.md)
+
