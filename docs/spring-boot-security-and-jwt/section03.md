@@ -19,7 +19,7 @@
   - Spring Data JPA
   - Mustache
 
-JWT를 만드릭 쉽게 도와주는 Java JWT Library를 Gradle에 추가합니다.
+JWT를 만들기 쉽게 도와주는 Java JWT Library를 Gradle에 추가합니다.
 
 ```groovy
 implementation group: 'com.auth0', name: 'java-jwt', version: '4.4.0'
@@ -74,9 +74,9 @@ public class RestApiController {
 }
 ```
 
-프로젝트 실행 후 `http://localhost:8080/home`를 입력하면 로그인 페이지가 뜹니다.
+프로젝트 실행 후 `http://localhost:8080/home` 를 입력하면 로그인 페이지가 뜹니다.
 
-![image](https://github.com/deeev-sb/TIL/assets/46712693/067c7dc2-d5d2-44ec-a13d-3407de15d163)
+<img width="250" src="https://github.com/deeev-sb/TIL/assets/46712693/067c7dc2-d5d2-44ec-a13d-3407de15d163"  alt="login"/>
 
 `Username`은 `user`를 입력하면 되고, `Password`는 다음과 같이 터미널에 있는 password를 그대로 입력하면 됩니다.
 
@@ -86,7 +86,7 @@ Using generated security password: 9d69ebda-d75c-4407-8cb5-7efd8e21d926
 
 그러면 `/home`으로 접속되는 것을 확인할 수 있습니다.
 
-![image](https://github.com/deeev-sb/TIL/assets/46712693/c8c68385-ba42-432e-a430-e731858435ae)
+<img width="300" alt="home" src="https://github.com/deeev-sb/TIL/assets/46712693/c8c68385-ba42-432e-a430-e731858435ae" />
 
 ## Security 설정
 
@@ -194,9 +194,14 @@ public class SecurityConfig {
                 .cors(cors -> cors
                         .configurationSource(corsConfig.corsConfigurationSource()))
                 // ...
+                ;
     }
 }
 ```
+
+참고로, `Controller` 클래스에 `@CrossOrigin`을 통해 `CORS` 설정을 할 수 있는데, 인증이 필요한 요청에 대해서는 허용하지 않습니다.
+그러므로 `@CrossOrigin`이 아닌 `Config` 생성을 통해 `CORS` 설정을 해야 합니다.
+
 
 
 > 본 게시글은 [스프링부트 시큐리티 & JWT 강의](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8-%EC%8B%9C%ED%81%90%EB%A6%AC%ED%8B%B0/dashboard) 강의를 참고하여 작성되었습니다.
