@@ -5,3 +5,4 @@ gh-pages.pub
 *.log
 .vscode
 *-7.10.2
+.obsidian/*
